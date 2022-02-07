@@ -1,0 +1,53 @@
+unifiedUpgradeAllowed: true
+databaseUpgradeReady: true
+xray:
+  jfrogUrl: http://xray-xray.rt:8082
+replicaCount: 1
+postgresql:
+  postgresqlPassword: xray
+rabbitmq-ha:
+  enabled: false
+rabbitmq:
+  enabled: true
+  auth:
+    username: guest
+    password: guest
+common:
+  customInitContainersBegin: |
+    - name: "prepare-fluentd-conf-on-persistent-volume"
+      image: "{{ .Values.initContainerImage }}"
+      imagePullPolicy: "{{ .Values.imagePullPolicy }}"
+      command:
+        - 'sh'
+        - '-c'
+        - >
+          mkdir -p {{ .Values.xray.persistence.mountPath }}/etc/fluentd/;
+          curl https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/InitialSetup/fluent.conf.xray -o {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluentd.conf;
+          cp {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluentd.conf  {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
+          sed -i -e 's|JPD_URL|{{ .Values.jfrog.observability.jpd_url }}|g' {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
+          sed -i -e 's/ADMIN_USERNAME/{{ .Values.jfrog.observability.username }}/' {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
+          sed -i -e 's/JFROG_API_KEY/{{ .Values.jfrog.observability.apikey }}/' {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
+          sed -i -e 's/LICENSE_KEY/{{ .Values.newrelic.licensekey }}/' {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
+          mv {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluentd.conf;
+      volumeMounts:
+        - mountPath: "{{ .Values.xray.persistence.mountPath }}"
+          name: data-volume
+  customSidecarContainers: |
+    - name: "xray-platform-fluentd-sidecar"
+      image: "partnership-public-images.jfrog.io/fluentd/fluentd:1.17.0"
+      imagePullPolicy: "IfNotPresent"
+      volumeMounts:
+        - mountPath: "{{ .Values.xray.persistence.mountPath }}"
+          name: data-volume
+      env:
+        - name: JF_PRODUCT_DATA_INTERNAL
+          value: {{ .Values.xray.persistence.mountPath }}
+        - name: FLUENTD_CONF
+          value: ../../../../{{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluentd.conf
+newrelic:
+  licensekey: newrelic_licensekey
+jfrog:
+  observability:
+    jpd_url: jpd_url
+    username: jfrog_user
+    apikey: jfrog_api_key
