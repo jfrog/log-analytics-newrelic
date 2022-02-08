@@ -146,17 +146,6 @@
   remove_keys _impacted_artifacts_url_, _type_, _watch_name_, _violation_details_url_, _cvss_score_, _cvss_version_
 </filter>
 
-<source>
-  @type jfrog_metrics
-  @id metrics_http_jfrt
-  tag jfrog.metrics.xray
-  interval 5s
-  metric_prefix 'jfrog.xray'
-  jpd_url JPD_URL
-  username ADMIN_USERNAME
-  apikey JFROG_API_KEY
-</source>
-
 ####################
 # NEWRELIC OUTPUT
 ####################

@@ -222,18 +222,6 @@
     </record>
 </filter>
 
-<source>
-  @type jfrog_metrics
-  @id metrics_http_jfrt
-  tag jfrog.metrics.artifactory
-  interval 5s
-  metric_prefix 'jfrog.artifactory'
-  jpd_url JPD_URL
-  username ADMIN_USERNAME
-  apikey API_KEY
-</source>
-
-
 ####################
 # NEWRELIC OUTPUT
 ####################
