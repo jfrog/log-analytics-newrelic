@@ -36,6 +36,6 @@ newrelic:
 jfrog:
   observability:
     metrics:
-      jpd_url: jpd_url
+      jpd_url: jfrog_jpd_url
       username: jfrog_user
       apikey: jfrog_api_key
