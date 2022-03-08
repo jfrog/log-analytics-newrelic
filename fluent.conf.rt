@@ -222,6 +222,30 @@
     </record>
 </filter>
 
+<source>
+  @type jfrog_metrics
+  @id metrics_http_jfrt
+  tag jfrog.metrics.artifactory
+  interval 5s
+  metric_prefix 'jfrog.artifactory'
+  jpd_url JPD_URL
+  username ADMIN_USERNAME
+  apikey JFROG_API_KEY
+  token JFROG_ACCESS_TOKEN
+  target_platform "NEWRELIC"
+</source>
+
+####################
+# NEWRELIC METRICS OUTPUT
+####################
+
+<match jfrog.metrics.**>
+  @type jfrog_send_metrics
+  target_platform "NEWRELIC"
+  apikey LICENSE_KEY
+  url "https://metric-api.newrelic.com/metric/v1"
+</match>
+
 ####################
 # NEWRELIC OUTPUT
 ####################

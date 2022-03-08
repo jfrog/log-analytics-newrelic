@@ -27,7 +27,7 @@ common:
           sed -i -e 's|JPD_URL|{{ .Values.xray.jfrogUrl }}|g' {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
           sed -i -e 's/ADMIN_USERNAME/{{ .Values.jfrog.observability.username }}/' {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
           sed -i -e 's/JFROG_API_KEY/{{ .Values.jfrog.observability.apikey }}/' {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
-          sed -i -e 's/LICENSE_KEY/{{ .Values.newrelic.licensekey }}/' {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
+          sed -i -e 's/LICENSE_KEY/{{ .Values.newrelic.licensekey }}/g' {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
           mv {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluentd.conf;
       volumeMounts:
         - mountPath: "{{ .Values.xray.persistence.mountPath }}"

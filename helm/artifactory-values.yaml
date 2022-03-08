@@ -19,14 +19,14 @@ artifactory:
           mv {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf;
       volumeMounts:
         - mountPath: "{{ .Values.artifactory.persistence.mountPath }}"
-          name: volume
+          name: artifactory-volume
   customSidecarContainers: |
     - name: "artifactory-fluentd-sidecar"
       image: "partnership-public-images.jfrog.io/fluentd/fluentd:1.17.0"
       imagePullPolicy: "IfNotPresent"
       volumeMounts:
         - mountPath: "{{ .Values.artifactory.persistence.mountPath }}"
-          name: volume
+          name: artifactory-volume
       env:
         - name: JF_PRODUCT_DATA_INTERNAL
           value: {{ .Values.artifactory.persistence.mountPath }}
@@ -37,7 +37,7 @@ newrelic:
 jfrog:
   observability:
     metrics:
-      jpd_url: jfrog_jpd_url
+      jpd_url: jpd_url
       username: jfrog_user
       apikey: jfrog_api_key
       accesstoken: jfrog_access_token

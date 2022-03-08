@@ -146,6 +146,29 @@
   remove_keys _impacted_artifacts_url_, _type_, _watch_name_, _violation_details_url_, _cvss_score_, _cvss_version_
 </filter>
 
+<source>
+  @type jfrog_metrics
+  @id metrics_http_jfrt
+  tag jfrog.metrics.xray
+  interval 5s
+  metric_prefix 'jfrog.xray'
+  jpd_url JPD_URL
+  username ADMIN_USERNAME
+  apikey JFROG_API_KEY
+  target_platform "NEWRELIC"
+</source>
+
+####################
+# NEWRELIC METRICS OUTPUT
+####################
+
+<match jfrog.metrics.**>
+  @type jfrog_send_metrics
+  target_platform "NEWRELIC"
+  apikey LICENSE_KEY
+  url "https://metric-api.newrelic.com/metric/v1"
+</match>
+
 ####################
 # NEWRELIC OUTPUT
 ####################
@@ -155,3 +178,4 @@
   license_key LICENSE_KEY
   logtype "jfrog_xray_logs"
 </match>
+
