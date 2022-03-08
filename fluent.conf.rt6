@@ -80,6 +80,7 @@
   apikey JFROG_API_KEY
   token JFROG_ACCESS_TOKEN
   target_platform "NEWRELIC"
+  common_jpd COMMON_JPD
 </source>
 
 ####################
