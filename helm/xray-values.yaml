@@ -34,7 +34,7 @@ common:
           name: data-volume
   customSidecarContainers: |
     - name: "xray-platform-fluentd-sidecar"
-      image: "partnership-public-images.jfrog.io/fluentd/fluentd:1.18.0"
+      image: "partnership-public-images.jfrog.io/fluentd/fluentd:1.19.0"
       imagePullPolicy: "IfNotPresent"
       volumeMounts:
         - mountPath: "{{ .Values.xray.persistence.mountPath }}"
