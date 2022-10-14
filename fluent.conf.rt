@@ -241,10 +241,6 @@
 ####################
 
 <match jfrog.metrics.**>
-  @type stdout
-</match>
-
-<match jfrog.metrics.**>
   @type jfrog_send_metrics
   target_platform "NEWRELIC"
   apikey LICENSE_KEY
