@@ -17,6 +17,7 @@ artifactory:
           sed -i -e 's/JFROG_ACCESS_TOKEN/{{ .Values.jfrog.observability.metrics.accesstoken }}/' {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
           sed -i -e 's/COMMON_JPD/{{ .Values.jfrog.observability.metrics.common_jpd }}/' {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
           sed -i -e 's/LICENSE_KEY/{{ .Values.newrelic.licensekey }}/g' {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
+          cat {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
           mv {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf;
       volumeMounts:
         - mountPath: "{{ .Values.artifactory.persistence.mountPath }}"
