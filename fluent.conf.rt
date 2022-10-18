@@ -255,8 +255,8 @@
 # NEWRELIC OUTPUT
 ####################
 
-#<match jfrog.**>
-#  @type newrelic
-#  license_key LICENSE_KEY
-#  logtype "jfrog_artifactory_logs"
-#</match>
+<match jfrog.**>
+  @type newrelic
+  license_key LICENSE_KEY
+  logtype "jfrog_artifactory_logs"
+</match>
