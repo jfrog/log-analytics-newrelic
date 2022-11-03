@@ -18,6 +18,11 @@ RUN fluent-gem install fluent-plugin-jfrog-siem
 RUN fluent-gem install fluent-plugin-jfrog-metrics
 RUN fluent-gem install fluent-plugin-jfrog-send-metrics
 
+# Install prerequisites
+RUN apt-get update && apt-get install -y \
+curl
+CMD /bin/bash
+
 
 ## Install custom Fluentd plugins
 RUN if [ "$TGT_PLATFORM" = "SPLUNK" ] ; then echo "Downloading the fluentd plugin for $TGT_PLATFORM "; fluent-gem install fluent-plugin-splunk-hec; else echo "Not Downloading"; fi

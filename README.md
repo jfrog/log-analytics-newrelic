@@ -152,7 +152,7 @@ The <path_to_logs> should be an absolute path where the Jfrog Artifactory Logs f
 
 Command example
 
-'docker run -it --name jfrog-fluentd-newrelic-rt -v /var/opt/jfrog/artifactory/var:/var/opt/jfrog/artifactory --env-file Dockerenvfile_newrelic.txt jfrog/fluentd-newelic-rt'
+'docker run -it --name jfrog-fluentd-newrelic-rt -v /var/opt/jfrog/artifactory/var:/var/opt/jfrog/artifactory --env-file Dockerenvfile_newrelic.txt jfrog/fluentd-newrelic-rt'
 
 
 ```
