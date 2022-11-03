@@ -16,7 +16,7 @@ USER root
 ## Install JFrog Plugins
 RUN fluent-gem install fluent-plugin-jfrog-siem
 RUN fluent-gem install fluent-plugin-jfrog-metrics
-#RUN fluent-gem install fluent-plugin-jfrog-send-metrics
+RUN fluent-gem install fluent-plugin-jfrog-send-metrics
 
 
 ## Install custom Fluentd plugins
