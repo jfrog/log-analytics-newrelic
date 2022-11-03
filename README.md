@@ -103,10 +103,10 @@ After FluentD is successfully installed, the below plugins are required to be in
 
 ```text
 
-	'gem install fluent-plugin-newrelic'
-	'gem install fluent-plugin-jfrog-siem'
-	'gem install fluent-plugin-jfrog-metrics'
-    'gem install fluent-plugin-jfrog-send-metrics'
+'gem install fluent-plugin-newrelic'
+'gem install fluent-plugin-jfrog-siem'
+'gem install fluent-plugin-jfrog-metrics'
+'gem install fluent-plugin-jfrog-send-metrics'
 
 ```
 
@@ -120,39 +120,39 @@ Configure `fluent.conf.*` according to the instructions mentioned in [Fluentd Co
 
 ### Docker
 
-In order to run fluentd as a docker image to send the log, siem and metrics data to splunk, the following commands needs to be executed on the host that runs the docker.
+In order to run fluentd as a docker image to send the log, siem and metrics data to Newrelic, the following commands needs to be executed on the host that runs the docker.
 
 1. Check the docker installation is functional, execute command 'docker version' and 'docker ps'.
 
 2. Once the version and process are listed successfully, build the intended docker image for the observability platform using the docker file,
 
-	* Download Dockerfile from [here](https://raw.githubusercontent.com/jfrog/log-analytics/master/docker-build/Dockerfile) to any directory which has write permissions.
+	* Download Dockerfile from [here](https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/master/docker-build/Dockerfile) to any directory which has write permissions.
 
 3. Download the Dockerenvfile_<observability_platform>.txt file needed to run Jfrog/FluentD Docker Images for the intended observability platform,
 
-	* Download Dockerenvfile_splunk.txt from [here](https://raw.githubusercontent.com/jfrog/log-analytics/master/docker-build/Dockerenvfile_splunk.txt) to the directory where the docker file was downloaded.
+	* Download Dockerenvfile_newrelic.txt from [here](https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/master/docker-build/Dockerenvfile_newrelic.txt) to the directory where the docker file was downloaded.
 
 ```text
 
-For Splunk as the observability platform, execute these commands to setup the docker container running the fluentd installation
+For Newrelic as the observability platform, execute these commands to setup the docker container running the fluentd installation
 
-1. Execute 'docker build --build-arg SOURCE="JFRT" --build-arg TARGET="SPLUNK" -t <image_name> .'
+1. Execute 'docker build --build-arg SOURCE="JFRT" --build-arg TARGET="NEWRELIC" -t <image_name> .'
 
 Command example
 
-'docker build --build-arg SOURCE="JFRT" --build-arg TARGET="SPLUNK" -t jfrog/fluentd-splunk-rt .'
+'docker build --build-arg SOURCE="JFRT" --build-arg TARGET="NEWRELIC" -t jfrog/fluentd-newrelic-rt .'
 
 The above command will build the docker image.
 
-2. Fill the necessary information in the Dockerenvfile_splunk.txt file, if the value for any of the field requires to have a '/' use '\/' and if '\' is required use '\\'.
+2. Fill the necessary information in the Dockerenvfile_newrelic.txt file, if the value for any of the field requires to have a '/' use '\/' and if '\' is required use '\\'.
 
-3. Execute 'docker run -it --name jfrog-fluentd-splunk-rt -v <path_to_logs>:/var/opt/jfrog/artifactory --env-file Dockerenvfile_splunk.txt <image_name>' 
+3. Execute 'docker run -it --name jfrog-fluentd-newrelic-rt -v <path_to_logs>:/var/opt/jfrog/artifactory --env-file Dockerenvfile_newrelic.txt <image_name>' 
 
 The <path_to_logs> should be an absolute path where the Jfrog Artifactory Logs folder resides, i.e for an Docker based Artifactory Installation,  ex: /var/opt/jfrog/artifactory/var/logs on the docker host.
 
 Command example
 
-'docker run -it --name jfrog-fluentd-splunk-rt -v /var/opt/jfrog/artifactory/var:/var/opt/jfrog/artifactory --env-file Dockerenvfile_splunk.txt jfrog/fluentd-splunk-rt'
+'docker run -it --name jfrog-fluentd-newrelic-rt -v /var/opt/jfrog/artifactory/var:/var/opt/jfrog/artifactory --env-file Dockerenvfile_newrelic.txt jfrog/fluentd-newelic-rt'
 
 
 ```
@@ -280,7 +280,7 @@ Override the match directive(jfrog.**) of the downloaded `fluent.conf.rt`  to se
 
 _**required**_: ```LICENSE_KEY``` is the License Key from New Relic in [NewRelic Setup](#newrelic-setup)
 
-#### OpneMetrics data
+#### OpenMetrics data
 
 Override the source directive of the downloaded `fluent.conf.rt` in order to source metrics from Artifactory
 
