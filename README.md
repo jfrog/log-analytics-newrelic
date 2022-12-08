@@ -36,35 +36,15 @@ Helm based installs will already have this defined based upon the underlying doc
 
 For non-k8s based installations below is a reference to the Docker image locations per product. Note these locations may be different based upon the installation location chosen.
 
-````text
-Artifactory: 
-export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/artifactory/
-````
+| Product          | Command                                                       |
+| ---------------- |---------------------------------------------------------------|
+| Artifactory      | export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/artifactory/   |
+| Xray             | export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/xray/          |
+| Nginx            | export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/nginx/         |
+| Mission Control  | export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/mc/            |
+| Distribution     | export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/distribution/  |
+| Pipelines        | export JF_PRODUCT_DATA_INTERNAL=/opt/jfrog/pipelines/var/     |
 
-````text
-Xray:
-export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/xray/
-````
-
-````text
-Nginx:
-export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/nginx/
-````
-
-````text
-Mission Control:
-export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/mc/
-````
-
-````text
-Distribution:
-export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/distribution/
-````
-
-````text
-Pipelines:
-export JF_PRODUCT_DATA_INTERNAL=/opt/jfrog/pipelines/var/
-````
 
 ## Fluentd Installation
 
@@ -78,26 +58,24 @@ Ensure you have access to the Internet from VM. Recommended install is through f
 | Debian/Ubuntu  | Linux - APT            | https://docs.fluentd.org/installation/install-by-deb |
 | MacOS/Darwin   | MacOS - DMG            | https://docs.fluentd.org/installation/install-by-dmg |
 | Windows        | Windows - MSI          | https://docs.fluentd.org/installation/install-by-msi |
-| Gem Install**	 | MacOS & Linux - Gem			 | https://docs.fluentd.org/installation/install-by-gem | 
+| Gem Install**	 | MacOS & Linux - Gem    | https://docs.fluentd.org/installation/install-by-gem | 
 
 
-```text
 ** For Gem based install, Ruby Interpreter has to be setup first, following is the recommended process to install Ruby
 
 1. Install Ruby Version Manager (RVM) as described in https://rvm.io/rvm/install#installation-explained, ensure to follow all the onscreen instructions provided to complete the rvm installation
 	* For installation across users a SUDO based install is recommended, the installation is as described in https://rvm.io/support/troubleshooting#sudo
 
-2. Once rvm installation is complete, verify the RVM installation executing the command 'rvm -v'
+2. Once rvm installation is complete, verify the RVM installation executing the command `rvm -v`
 
-3. Now install ruby v2.7.0 or above executing the command 'rvm install <ver_num>', ex: 'rvm install 2.7.5'
+3. Now install ruby v2.7.0 or above executing the command `rvm install <ver_num>`, ex: `rvm install 2.7.5`
 
-4. Verify the ruby installation, execute 'ruby -v', gem installation 'gem -v' and 'bundler -v' to ensure all the components are intact
+4. Verify the ruby installation, execute `ruby -v`, gem installation `gem -v` and `bundler -v` to ensure all the components are intact
 
 5. Post completion of Ruby, Gems installation, the environment is ready to further install new gems, execute the following gem install commands one after other to setup the needed ecosystem
 
-	'gem install fluentd'
+	`gem install fluentd`
 
-```
 
 After FluentD is successfully installed, the below plugins are required to be installed
 
@@ -178,8 +156,8 @@ helm repo add jfrog https://charts.jfrog.io
 helm repo update
 ```
 
-Replace placeholders with your ``masterKey`` and ``joinKey``. To generate each of them, use the command
-``openssl rand -hex 32``
+Replace placeholders with your `masterKey` and `joinKey`. To generate each of them, use the command
+`openssl rand -hex 32`
 
 Artifactory ⎈:
 
@@ -512,8 +490,6 @@ JFrog Xray Dashboard is divided into two sections Logs and Violations
 ## References
 
 * [Fluentd](https://www.fluentd.org) - Fluentd Logging Aggregator/Agent
-* [New Relic]() - New Relic Platform
-* [New Relic Fluentd plugin]() - Fluentd output plugin for sending data to New Relic
-* [JFrog SIEM plugin]() - Fleuntd input plugin to source JFrog Xray Violations
-* [JFrog Metrics Plugin]() - Fluentd input plugin to gather metrics (Artifactory, Xray)
-* [JFrog Send Metrics Plugin]() - Fluentd output plugin to send metrics to New Relic
+* [New Relic](https://one.newrelic.com/) - New Relic Platform
+* [New Relic Fluentd plugin](https://docs.newrelic.com/docs/logs/forward-logs/fluentd-plugin-log-forwarding/) - Fluentd output plugin for sending data to New Relic
+* [JFrog SIEM plugin](https://github.com/jfrog/fluent-plugin-jfrog-siem) - Fleuntd input plugin to source JFrog Xray Violations

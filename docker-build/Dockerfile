@@ -19,8 +19,7 @@ RUN fluent-gem install fluent-plugin-jfrog-metrics
 RUN fluent-gem install fluent-plugin-jfrog-send-metrics
 
 # Install prerequisites
-RUN apt-get update && apt-get install -y \
-curl
+RUN apt-get update && apt-get install -y curl
 CMD /bin/bash
 
 
