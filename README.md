@@ -1,5 +1,7 @@
 # NEWRELIC
 
+`We only support this integration for Artifactory versions above 7`
+
 ## Table of Contents
 `Note! You must follow the order of the steps throughout NewRelic Configuration`
 
