@@ -244,7 +244,7 @@
 <source>
   @type exec
   tag jfrog.callhome
-  command "curl --request GET 'JPD_URL/artifactory/api/system/version' -H 'Authorization: Bearer JFROG_ADMIN_TOKEN'"
+  command "curl --request GET 'JPD_URL/artifactory/api/system/version' -H 'Authorization: Bearer JFROG_ACCESS_TOKEN'"
   run_interval 1d
   <parse>
     @type json
@@ -256,7 +256,7 @@
   keep_keys 'productId,features'
   enable_ruby true
   <record>
-    productId 'jfrogLogAnalyticsSplunk/0.13.0'
+    productId 'jfrogLogAnalyticsNewRelic/0.1.0'
     features ${return([{"featureId" => "ArtifactoryVersion/" + record["version"]}])}
   </record>
 </filter>
@@ -265,7 +265,7 @@
   endpoint JPD_URL/artifactory/api/system/usage
   open_timeout 5
   content_type application/json
-  headers {"Authorization":"Bearer JFROG_ADMIN_TOKEN"}
+  headers {"Authorization":"Bearer JFROG_ACCESS_TOKEN"}
   <format>
     @type json
   </format>
