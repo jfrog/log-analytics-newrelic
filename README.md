@@ -18,7 +18,9 @@
     * [Configuration steps for Distribution](#configuration-steps-for-distribution)
     * [Configuration steps for Pipelines](#configuration-steps-for-pipelines)
 5. [Dashboards](#dashboards)
-6. [References](#references)
+6. [Demo Requirements](#demo-requirements)
+7. [Generating data for Testing](#generating-data-for-testing)
+8. [References](#references)
 
 ## NewRelic Setup
 
@@ -488,6 +490,17 @@ JFrog Xray Dashboard is divided into two sections Logs and Violations
 * **Logs** - This dashboard provides a summary of access, service and traffic log volumes associated with Xray. Additionally, customers are also able to track various HTTP response codes, HTTP 500 errors, and log errors for greater operational insight
 * **Violations** - This dashboard provides an aggregated summary of all the license violations and security vulnerabilities found by Xray.  Information is segment by watch policies and rules.  Trending information is provided on the type and severity of violations over time, as well as, insights on most frequently occurring CVEs, top impacted artifacts and components.  
 * **Metrics** - To gain insights into the system performance, storage consumption, connection statistics, count and type of artifacts and components scanned by JFrog Xray
+
+## Demo Requirements
+
+* Kubernetes Cluster
+* Artifactory and/or Xray installed via [JFrog Helm Charts](https://github.com/jfrog/charts)
+* Helm 3
+* New Relic account setup with license key
+
+## Generating Data for Testing
+[Partner Integration Test Framework](https://github.com/jfrog/partner-integration-tests) can be used to generate data for metrics.
+
 
 ## References
 
