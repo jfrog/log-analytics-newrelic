@@ -501,7 +501,6 @@ JFrog Xray Dashboard is divided into two sections Logs and Violations
 ## Generating Data for Testing
 [Partner Integration Test Framework](https://github.com/jfrog/partner-integration-tests) can be used to generate data for metrics.
 
-
 ## References
 
 * [Fluentd](https://www.fluentd.org) - Fluentd Logging Aggregator/Agent
