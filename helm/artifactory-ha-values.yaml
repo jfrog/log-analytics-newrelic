@@ -9,7 +9,7 @@ artifactory:
         - '-c'
         - >
           mkdir -p {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/;
-          curl https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/InitialSetup/fluent.conf.rt -o {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf;
+          curl https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/PTRENG5554-Fix-Bugs/fluent.conf.rt -o {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf;
           cp {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf  {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
           sed -i -e 's|JPD_URL|{{ .Values.jfrog.observability.metrics.jpd_url }}|g' {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
           sed -i -e 's/ADMIN_USERNAME/{{ .Values.jfrog.observability.metrics.username }}/' {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
