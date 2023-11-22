@@ -22,7 +22,7 @@ common:
         - '-c'
         - >
           mkdir -p {{ .Values.xray.persistence.mountPath }}/etc/fluentd/;
-          curl https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/InitialSetup/fluent.conf.xray -o {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluentd.conf;
+          curl https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/master/fluent.conf.xray -o {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluentd.conf;
           cp {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluentd.conf  {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
           sed -i -e 's|JPD_URL|{{ .Values.xray.jfrogUrl }}|g' {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
           sed -i -e 's/ADMIN_USERNAME/{{ .Values.jfrog.observability.username }}/' {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
