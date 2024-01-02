@@ -1,7 +1,7 @@
-installerInfo: '{ "productId": "Helm_NewRelic_artifactory/{{ .Chart.Version }}", "features": [ { "featureId": "ArtifactoryVersion/{{ default .Chart.AppVersion .Values.artifactory.image.version }}" }, { "featureId": "{{ if .Values.postgresql.enabled }}postgresql{{ else }}{{ .Values.database.type }}{{ end }}/0.0.0" }, { "featureId": "Platform/{{ default "kubernetes" .Values.installer.platform }}" },  { "featureId": "Channel/Helm_NewRelic_artifactory" } ] }'
+installerInfo: '{ "productId": "OnPremObservability-Newrelic/2.0.0", "features": [ { "featureId": "ArtifactoryVersion/{{ default .Chart.AppVersion .Values.artifactory.image.version }}" }, { "featureId": "{{ if .Values.postgresql.enabled }}postgresql{{ else }}{{ .Values.database.type }}{{ end }}/0.0.0" }, { "featureId": "Platform/{{ default "kubernetes" .Values.installer.platform }}" },  { "featureId": "Channel/OnPremObservability-Newrelic-Helm" } ] }'
 artifactory:
   customInitContainersBegin: |
-    - name: "prepare-fluentd-conf-on-persistent-volume"
+    - name: "download-fluentd-conf-on-persistent-volume"
       image: "{{ .Values.initContainerImage }}"
       imagePullPolicy: "{{ .Values.artifactory.image.pullPolicy }}"
       command:
@@ -9,20 +9,13 @@ artifactory:
         - '-c'
         - >
           mkdir -p {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/;
-          curl https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/master/fluent.conf.rt -o {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf;
-          cp {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf  {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
-          sed -i -e 's|JPD_URL|{{ .Values.jfrog.observability.metrics.jpd_url }}|g' {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
-          sed -i -e 's/ADMIN_USERNAME/{{ .Values.jfrog.observability.metrics.username }}/' {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
-          sed -i -e 's/JFROG_API_KEY/{{ .Values.jfrog.observability.metrics.apikey }}/' {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
-          sed -i -e 's/JFROG_ACCESS_TOKEN/{{ .Values.jfrog.observability.metrics.accesstoken }}/' {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
-          sed -i -e 's/LICENSE_KEY/{{ .Values.newrelic.licensekey }}/g' {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
-          mv {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf;
+          curl https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/PTRENG5674-Upgrade-integration/fluent.conf.rt -o {{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf;
       volumeMounts:
         - mountPath: "{{ .Values.artifactory.persistence.mountPath }}"
           name: artifactory-volume
   customSidecarContainers: |
     - name: "artifactory-fluentd-sidecar"
-      image: "partnership-public-images.jfrog.io/fluentd/fluentd:1.22.0"
+      image: "releases-pts-observability-fluentd.jfrog.io/fluentd:2.1"
       imagePullPolicy: "IfNotPresent"
       volumeMounts:
         - mountPath: "{{ .Values.artifactory.persistence.mountPath }}"
@@ -30,14 +23,25 @@ artifactory:
       env:
         - name: JF_PRODUCT_DATA_INTERNAL
           value: {{ .Values.artifactory.persistence.mountPath }}
+        - name: JPD_URL
+          value: {{ .Values.jfrog.observability.jpd_url }}
+        - name: JPD_ADMIN_USERNAME
+          value: {{ .Values.jfrog.observability.username }}
+        - name: JFROG_ADMIN_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-admin-token
+              key: token
+        - name: COMMON_JPD
+          value: {{ .Values.jfrog.observability.common_jpd | quote }}
+        - name: NEWRELIC_LICENSE_KEY
+          value: {{ .Values.newrelic.license_key }}
         - name: FLUENTD_CONF
           value: ../../../../{{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf
 newrelic:
-  licensekey: newrelic_licensekey
+  license_key: NEWRELIC_LICENSE_KEY
 jfrog:
   observability:
-    metrics:
-      jpd_url: jpd_url
-      username: jfrog_user
-      apikey: jfrog_api_key
-      accesstoken: jfrog_access_token
+    jpd_url: JPD_URL
+    username: JPD_ADMIN_USERNAME
+    common_jpd: COMMON_JPD
