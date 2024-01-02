@@ -130,7 +130,7 @@
   </record>
   remove_keys _impacted_artifacts_url_, _type_, _watch_name_, _violation_details_url_, _cvss_score_, _cvss_version_
 </filter>
-<match jfrog.**>
+<match jfrog.xray.siem.**>
   @type newrelic
   license_key "#{ENV['NEWRELIC_LICENSE_KEY']}"
   logtype "jfrog_xray_violations"
@@ -318,6 +318,11 @@
     </record>
   </filter>
 
+  # TEST OUTPUT
+  #<match **>
+  #  @type stdout
+  #</match>
+
   # NEWRELIC OUTPUT
   ## NEWRELIC XRAY LOGS OUTPUT
   <match jfrog.**>
@@ -325,10 +330,5 @@
     license_key "#{ENV['NEWRELIC_LICENSE_KEY']}"
     logtype "jfrog_xray_logs"
   </match>
-
-  # TEST OUTPUT
-  #<match **>
-  #  @type stdout
-  #</match>
 
 </label>
