@@ -1,9 +1,0 @@
-JFROG_PRODUCT=rt
-JF_PRODUCT_DATA_INTERNAL=path_to_jfrog_logs
-JPD_URL=http:\/\/change_me.jfrog.tech
-ADMIN_USERNAME=change_me
-JFROG_API_KEY=change_me
-JFROG_ACCESS_TOKEN=change_me
-COMMON_JPD=false
-LICENSE_KEY=change_me
-
