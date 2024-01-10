@@ -27,7 +27,7 @@ artifactory:
           value: {{ .Values.jfrog.observability.jpd_url }}
         - name: JPD_ADMIN_USERNAME
           value: {{ .Values.jfrog.observability.username }}
-        - name: JFROG_ADMIN_TOKEN
+        - name: JPD_ADMIN_TOKEN
           valueFrom:
             secretKeyRef:
               name: jfrog-admin-token
