@@ -1,6 +1,6 @@
 # NEWRELIC
 
-`This integration is last tested with Artifactory 7.55.6 and Xray 3.69.3 versions.`
+`This integration is last tested with Artifactory 7.71.4 and Xray 3.85.5 versions.`
 
 ## Table of Contents
 `Note! You must follow the order of the steps throughout NewRelic Configuration`
