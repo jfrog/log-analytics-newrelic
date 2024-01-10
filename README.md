@@ -1,26 +1,19 @@
 # NEWRELIC
 
-`We only support this integration for Artifactory versions above 7`
+`This integration is last tested with Artifactory 7.71.4 and Xray 3.85.5 versions.`
 
 ## Table of Contents
 `Note! You must follow the order of the steps throughout NewRelic Configuration`
 
 1. [NewRelic Setup](#newrelic-setup)
-2. [Environment Configuration](#environment-configuration)
+2. [JFrog Metrics Setup](#jfrog-metrics-setup)
 3. [Fluentd Installation](#fluentd-installation)
     * [OS / Virtual Machine](#os--virtual-machine)
     * [Docker](#docker)
     * [Kubernetes Deployment with Helm](#kubernetes-deployment-with-helm)
-4. [Fluentd Configuration for NewRelic](#fluentd-configuration-for-newrelic)
-    * [Configuration steps for Artifactory](#configuration-steps-for-artifactory)
-    * [Configuration steps for Xray](#configuration-steps-for-xray)
-    * [Configuration steps for Mission Control](#configuration-steps-for-mission-control)
-    * [Configuration steps for Distribution](#configuration-steps-for-distribution)
-    * [Configuration steps for Pipelines](#configuration-steps-for-pipelines)
-5. [Dashboards](#dashboards)
-6. [Demo Requirements](#demo-requirements)
-7. [Generating data for Testing](#generating-data-for-testing)
-8. [References](#references)
+4. [Dashboards](#dashboards)
+5. [Generating data for Testing](#generating-data-for-testing)
+6. [References](#references)
 
 ## NewRelic Setup
 
@@ -30,25 +23,19 @@ New Relic setup can be done by going through the onboarding steps below or by us
 * From the account dropdown, click API keys
 * Copy the license key which is also referenced in the UI as ingest - license
 
-## Environment Configuration
+## JFrog Metrics Setup
+To enable metrics in Artifactory, make the following configuration changes to the [Artifactory System YAML](https://www.jfrog.com/confluence/display/JFROG/Artifactory+System+YAML)
+```yaml
+artifactory:
+    metrics:
+        enabled: true
+    openMetrics:
+        enabled: true
+```
+Once this configuration is done and the application is restarted, metrics will be available in Open Metrics Format
 
-We rely heavily on environment variables so that the correct log files are streamed to your observability dashboards. Ensure that you set the JF_PRODUCT_DATA_INTERNAL environment variable to the correct path for your product
-
-The environment variable JF_PRODUCT_DATA_INTERNAL must be defined to the correct location.
-
-Helm based installs will already have this defined based upon the underlying docker images.
-
-For non-k8s based installations below is a reference to the Docker image locations per product. Note these locations may be different based upon the installation location chosen.
-
-| Product          | Command                                                       |
-| ---------------- |---------------------------------------------------------------|
-| Artifactory      | export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/artifactory/   |
-| Xray             | export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/xray/          |
-| Nginx            | export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/nginx/         |
-| Mission Control  | export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/mc/            |
-| Distribution     | export JF_PRODUCT_DATA_INTERNAL=/var/opt/jfrog/distribution/  |
-| Pipelines        | export JF_PRODUCT_DATA_INTERNAL=/opt/jfrog/pipelines/var/     |
-
+Metrics are enabled by default in Xray.
+For kubernetes based installs, openMetrics are enabled in the helm install commands listed below
 
 ## Fluentd Installation
 
@@ -65,43 +52,53 @@ Ensure you have access to the Internet from VM. Recommended install is through f
 | Gem Install**	 | MacOS & Linux - Gem    | https://docs.fluentd.org/installation/install-by-gem | 
 
 
+```text
 ** For Gem based install, Ruby Interpreter has to be setup first, following is the recommended process to install Ruby
 
 1. Install Ruby Version Manager (RVM) as described in https://rvm.io/rvm/install#installation-explained, ensure to follow all the onscreen instructions provided to complete the rvm installation
 	* For installation across users a SUDO based install is recommended, the installation is as described in https://rvm.io/support/troubleshooting#sudo
 
-2. Once rvm installation is complete, verify the RVM installation executing the command `rvm -v`
+2. Once rvm installation is complete, verify the RVM installation executing the command 'rvm -v'
 
-3. Now install ruby v2.7.0 or above executing the command `rvm install <ver_num>`, ex: `rvm install 2.7.5`
+3. Now install ruby v2.7.0 or above executing the command 'rvm install <ver_num>', ex: 'rvm install 2.7.5'
 
-4. Verify the ruby installation, execute `ruby -v`, gem installation `gem -v` and `bundler -v` to ensure all the components are intact
+4. Verify the ruby installation, execute 'ruby -v', gem installation 'gem -v' and 'bundler -v' to ensure all the components are intact
 
 5. Post completion of Ruby, Gems installation, the environment is ready to further install new gems, execute the following gem install commands one after other to setup the needed ecosystem
 
-	`gem install fluentd`
-
-
-After FluentD is successfully installed, the below plugins are required to be installed
-
-```text
-
-'gem install fluent-plugin-newrelic'
-'gem install fluent-plugin-jfrog-siem'
-'gem install fluent-plugin-jfrog-metrics'
-'gem install fluent-plugin-jfrog-send-metrics'
+	'gem install fluentd'
 
 ```
 
+After FluentD is successfully installed, the below plugins are required to be installed
 
-Configure `fluent.conf.*` according to the instructions mentioned in [Fluentd Configuration for NewRelic](#fluentd-configuration-for-newrelic) section and then run the fluentd wrapper with one argument pointed to the `fluent.conf.*` file configured.
+```shell
+gem install fluent-plugin-concat
+gem install fluent-plugin-newrelic
+gem install fluent-plugin-jfrog-siem
+gem install fluent-plugin-jfrog-metrics
+gem install fluent-plugin-jfrog-send-metrics
+```
 
-````text
+#### Configure Fluentd
+We rely heavily on environment variables so that the correct log files are streamed to your observability dashboards. Ensure that you fill in the .env file with correct values. Download the jfrog.env file from [here](https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/master/jfrog.env)
+
+* **JF_PRODUCT_DATA_INTERNAL**: The environment variable JF_PRODUCT_DATA_INTERNAL must be defined to the correct location. For each JFrog service you will find its active log files in the `$JFROG_HOME/<product>/var/log` directory
+* **NEWRELIC_LICENSE_KEY**: License Key from [NewRelic](https://one.newrelic.com/launcher/api-keys-ui.api-keys-launcher)
+* **JPD_URL**: Artifactory JPD URL of the format `http://<ip_address>`
+* **JPD_ADMIN_USERNAME**: Artifactory username for authentication
+* **JPD_ADMIN_TOKEN**: Artifactory [Access Token](https://jfrog.com/help/r/how-to-generate-an-access-token-video/artifactory-creating-access-tokens-in-artifactory) for authentication
+* **COMMON_JPD**: This flag should be set as true only for non-kubernetes installations or installations where JPD base URL is same to access both Artifactory and Xray (ex: https://sample_base_url/artifactory or https://sample_base_url/xray)
+
+Apply the .env files and then run the fluentd wrapper with one argument pointed to the `fluent.conf.*` file configured.
+
+````shell
+source jfrog.env
 ./fluentd $JF_PRODUCT_DATA_INTERNAL/fluent.conf.<product_name>
 ````
 
-
 ### Docker
-
+`Note! These steps were not tested to work out of the box on MAC`
 In order to run fluentd as a docker image to send the log, siem and metrics data to Newrelic, the following commands needs to be executed on the host that runs the docker.
 
 1. Check the docker installation is functional, execute command 'docker version' and 'docker ps'.
@@ -110,37 +107,43 @@ In order to run fluentd as a docker image to send the log, siem and metrics data
 
 	* Download Dockerfile from [here](https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/master/docker-build/Dockerfile) to any directory which has write permissions.
 
-3. Download the Dockerenvfile_<observability_platform>.txt file needed to run Jfrog/FluentD Docker Images for the intended observability platform,
+3. Download the docker.env file needed to run Jfrog/FluentD Docker Images for the intended observability platform,
 
-	* Download Dockerenvfile_newrelic.txt from [here](https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/master/docker-build/Dockerenvfile_newrelic.txt) to the directory where the docker file was downloaded.
+	* Download docker.env from [here](https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/master/docker-build/docker.env) to the directory where the docker file was downloaded.
 
 ```text
 
-For Newrelic as the observability platform, execute these commands to setup the docker container running the fluentd installation
+For NewRelic as the observability platform, execute these commands to setup the docker container running the fluentd installation
 
 1. Execute 'docker build --build-arg SOURCE="JFRT" --build-arg TARGET="NEWRELIC" -t <image_name> .'
 
-Command example
+    Command example
 
-'docker build --build-arg SOURCE="JFRT" --build-arg TARGET="NEWRELIC" -t jfrog/fluentd-newrelic-rt .'
+    'docker build --build-arg SOURCE="JFRT" --build-arg TARGET="NEWRELIC" -t jfrog/fluentd-newrelic-rt .'
 
-The above command will build the docker image.
+    The above command will build the docker image.
 
-2. Fill the necessary information in the Dockerenvfile_newrelic.txt file, if the value for any of the field requires to have a '/' use '\/' and if '\' is required use '\\'.
+2. Fill the necessary information in the docker.env file
 
-3. Execute 'docker run -it --name jfrog-fluentd-newrelic-rt -v <path_to_logs>:/var/opt/jfrog/artifactory --env-file Dockerenvfile_newrelic.txt <image_name>' 
+    JF_PRODUCT_DATA_INTERNAL: The environment variable JF_PRODUCT_DATA_INTERNAL must be defined to the correct location. It will be the directory where logs are mounted ex: /var/opt/jfrog/artifactory
+    NEWRELIC_LICENSE_KEY: License Key from [NewRelic](https://one.newrelic.com/launcher/api-keys-ui.api-keys-launcher)
+    JPD_URL: Artifactory JPD URL of the format `http://<ip_address>`
+    JPD_ADMIN_USERNAME: Artifactory username for authentication
+    JPD_ADMIN_TOKEN: Artifactory [Access Token](https://jfrog.com/help/r/how-to-generate-an-access-token-video/artifactory-creating-access-tokens-in-artifactory) for authentication
+    COMMON_JPD: This flag should be set as true only for non-kubernetes installations or installations where JPD base URL is same to access both Artifactory and Xray (ex: https://sample_base_url/artifactory or https://sample_base_url/xray)
 
-The <path_to_logs> should be an absolute path where the Jfrog Artifactory Logs folder resides, i.e for an Docker based Artifactory Installation,  ex: /var/opt/jfrog/artifactory/var/logs on the docker host.
+3. Execute 'docker run -it --name jfrog-fluentd-newrelic-rt -v <path_to_logs>:/var/opt/jfrog/artifactory --env-file docker.env <image_name>'
 
-Command example
+    The <path_to_logs> should be an absolute path where the Jfrog Artifactory Logs folder resides, i.e for an Docker based Artifactory Installation,  ex: /var/opt/jfrog/artifactory/var/logs on the docker host.
 
-'docker run -it --name jfrog-fluentd-newrelic-rt -v /var/opt/jfrog/artifactory/var:/var/opt/jfrog/artifactory --env-file Dockerenvfile_newrelic.txt jfrog/fluentd-newrelic-rt'
+    Command example
+
+    'docker run -it --name jfrog-fluentd-newrelic-rt -v $JFROG_HOME/artifactory/var/:/var/opt/jfrog/artifactory --env-file docker.env jfrog/fluentd-newrelic-rt'
 
 
 ```
 
 ### Kubernetes Deployment with Helm
-
 Recommended installation for Kubernetes is to utilize the helm chart with the associated values.yaml in this repo.
 
 | Product        | Example Values File             |
@@ -149,329 +152,155 @@ Recommended installation for Kubernetes is to utilize the helm chart with the as
 | Artifactory HA | helm/artifactory-ha-values.yaml |
 | Xray           | helm/xray-values.yaml           |
 
-Update the values.yaml associated to the product you want to deploy with your New Relic settings.
-
-Then deploy the helm chart as described below:
-
 Add JFrog Helm repository:
 
-```text
+```shell
 helm repo add jfrog https://charts.jfrog.io
 helm repo update
 ```
-
-Replace placeholders with your `masterKey` and `joinKey`. To generate each of them, use the command
-`openssl rand -hex 32`
-
-Artifactory ⎈:
-
-Replace the `newrelic_licensekey` in `newrelic.licensekey` at the end of the yaml file with License key copied from New Relic in [NewRelic Setup](#newrelic-setup)
-
-Replace `jpd_url` in `jfrog.observability.metrics.jpd_url` with Artifactory JPD URL (note - if deployed on K8s use the localhost and port number combination per sidecar)
-
-Replace `jfrog_user` in `jfrog.observability.metrics.username` with Artifactory username for authentication
-
-Replace `jfrog_api_key` in `jfrog.observability.metrics.apikey` with [Artifactory API Key](https://www.jfrog.com/confluence/display/JFROG/User+Profile#UserProfile-APIKey)
-
-Replace `jfrog_access_token` in `jfrog.observability.metrics.accesstoken` with [Artifactory Scoped Token](https://www.jfrog.com/confluence/display/JFROG/Access+Tokens#AccessTokens-GeneratingAdminTokens)
-
-Replace `common_jpd_value` in `jfrog.observability.metrics.common_jpd` with true for non-kubernetes installations or installations where JPD base URL is same to access both Artifactory and Xray (ex: https://sample_base_url/artifactory or https://sample_base_url/xray). Default value is false
-
-```text
-helm upgrade --install artifactory  jfrog/artifactory \
-       --set artifactory.masterKey=FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF \
-       --set artifactory.joinKey=EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE \
-       -f helm/artifactory-values.yaml
-```
-
-Artifactory-HA ⎈:
-
-For HA installation, please create a license secret on your cluster prior to installation.
-
-```text
-kubectl create secret generic artifactory-license --from-file=<path_to_license_file>artifactory.cluster.license 
-```
-
-Note: Replace placeholders with your ``masterKey`` and ``joinKey``. To generate each of them, use the command
+Replace placeholders with your ``masterKey`` and ``joinKey``. To generate each of them, use the command
 ``openssl rand -hex 32``
 
-Replace the `newrelic_licensekey` in `newrelic.licensekey` at the end of the yaml file with License key copied from New Relic in [NewRelic Setup](#newrelic-setup)
+#### Artifactory ⎈:
 
-Replace `jpd_url` in `jfrog.observability.metrics.jpd_url` with Artifactory JPD URL (note - if deployed on K8s use the localhost and port number combination per sidecar)
+1. Skip this step if you already have Artifactory installed. Else, install Artifactory using the command below
+    ```shell
+    helm upgrade --install artifactory  jfrog/artifactory \
+           --set artifactory.masterKey=FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF \
+           --set artifactory.joinKey=EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE \
+           --set artifactory.license.secret=artifactory-license \
+           --set artifactory.license.dataKey=artifactory.cluster.license \
+           --set artifactory.metrics.enabled=true \
+           --set artifactory.openMetrics.enabled=true
+    ```
 
-Replace `jfrog_user` in `jfrog.observability.metrics.username` with Artifactory username for authentication
+2. Create a secret for JFrog's admin token - [Access Token](https://jfrog.com/help/r/how-to-generate-an-access-token-video/artifactory-creating-access-tokens-in-artifactory) using any of the following methods
+    ```shell
+    kubectl create secret generic jfrog-admin-token --from-file=token=<path_to_token_file>
+    
+    OR
+    
+    kubectl create secret generic jfrog-admin-token --from-literal=token=<JFROG_ADMN_TOKEN>
+    ```
+3. For Artifactory installation, download the .env file from [here](https://github.com/jfrog/log-analytics-newrelic/raw/master/helm/jfrog_helm.env). Fill in the jfrog_helm.env file with correct values.
 
-Replace `jfrog_api_key` in `jfrog.observability.metrics.apikey` with [Artifactory API Key](https://www.jfrog.com/confluence/display/JFROG/User+Profile#UserProfile-APIKey)
+    * **NEWRELIC_LICENSE_KEY**: License Key from [NewRelic](https://one.newrelic.com/launcher/api-keys-ui.api-keys-launcher)
+    * **JPD_URL**: Artifactory JPD URL of the format `http://<ip_address>`
+    * **JPD_ADMIN_USERNAME**: Artifactory username for authentication
+    * **COMMON_JPD**: This flag should be set as true only for non-kubernetes installations or installations where JPD base URL is same to access both Artifactory and Xray (ex: https://sample_base_url/artifactory or https://sample_base_url/xray)
 
-Replace `jfrog_access_token` in `jfrog.observability.metrics.accesstoken` with [Artifactory Scoped Token](https://www.jfrog.com/confluence/display/JFROG/Access+Tokens#AccessTokens-GeneratingAdminTokens)
+   Apply the .env files using the helm command below
 
-Replace `common_jpd_value` in `jfrog.observability.metrics.common_jpd` with true for non-kubernetes installations or installations where JPD base URL is same to access both Artifactory and Xray (ex: https://sample_base_url/artifactory or https://sample_base_url/xray). Default value is false
+    ````shell
+    source jfrog_helm.env
+    ````
 
-```text
-helm upgrade --install artifactory-ha  jfrog/artifactory-ha \
+4. Postgres password is required to upgrade Artifactory. Run the following command to get the current password
+   ```shell
+   POSTGRES_PASSWORD=$(kubectl get secret artifactory-postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode)
+   ```
+
+5. Upgrade Artifactory installation using the command below
+    ```shell
+    helm upgrade --install artifactory jfrog/artifactory \
+           --set artifactory.masterKey=FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF \
+           --set artifactory.joinKey=EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE \
+           --set artifactory.metrics.enabled=true --set artifactory.openMetrics.enabled=true \
+           --set databaseUpgradeReady=true --set postgresql.postgresqlPassword=$POSTGRES_PASSWORD --set nginx.service.ssloffload=true \
+           --set newrelic.license_key=$NEWRELIC_LICENSE_KEY \
+           --set jfrog.observability.jpd_url=$JPD_URL \
+           --set jfrog.observability.username=$JPD_ADMIN_USERNAME \
+           --set jfrog.observability.common_jpd=$COMMON_JPD \
+           -f helm/artifactory-values.yaml
+    ```
+
+#### Artifactory-HA ⎈:
+1. For HA installation, please create a license secret on your cluster prior to installation.
+   ```shell
+   kubectl create secret generic artifactory-license --from-file=<path_to_license_file>artifactory.cluster.license 
+   ```
+2. Skip this step if you already have Artifactory installed. Else, install Artifactory using the command below
+    ```shell
+    helm upgrade --install artifactory-ha  jfrog/artifactory-ha \
+           --set artifactory.masterKey=FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF \
+           --set artifactory.joinKey=EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE \
+           --set artifactory.license.secret=artifactory-license \
+           --set artifactory.license.dataKey=artifactory.cluster.license \
+           --set artifactory.metrics.enabled=true \
+           --set artifactory.openMetrics.enabled=true
+    ```
+3. Create a secret for JFrog's admin token - [Access Token](https://jfrog.com/help/r/how-to-generate-an-access-token-video/artifactory-creating-access-tokens-in-artifactory) using any of the following methods
+   ```shell
+   kubectl create secret generic jfrog-admin-token --from-file=token=<path_to_token_file>
+   
+   OR
+   
+   kubectl create secret generic jfrog-admin-token --from-literal=token=<JFROG_ADMN_TOKEN>
+   ```
+4. Download the .env file from [here](https://github.com/jfrog/log-analytics-newrelic/raw/master/helm/jfrog_helm.env). Fill in the jfrog_helm.env file with correct values.
+
+    * **NEWRELIC_LICENSE_KEY**: License Key from [NewRelic](https://one.newrelic.com/launcher/api-keys-ui.api-keys-launcher)
+    * **JPD_URL**: Artifactory JPD URL of the format `http://<ip_address>`
+    * **JPD_ADMIN_USERNAME**: Artifactory username for authentication
+    * **COMMON_JPD**: This flag should be set as true only for non-kubernetes installations or installations where JPD base URL is same to access both Artifactory and Xray (ex: https://sample_base_url/artifactory or https://sample_base_url/xray)
+
+   Apply the .env files and then run the helm command below
+
+   ````shell
+   source jfrog_helm.env
+   ````
+5. Postgres password is required to upgrade Artifactory. Run the following command to get the current password
+   ```shell
+   POSTGRES_PASSWORD=$(kubectl get secret artifactory-ha-postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode)
+   ```
+6. Upgrade Artifactory HA installation using the command below
+   ```text
+   helm upgrade --install artifactory-ha  jfrog/artifactory-ha \
        --set artifactory.masterKey=FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF \
-       --set artifactory.joinKey=EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE \
+       --set artifactory.joinKey=EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE --set artifactory.replicaCount=0 \
+       --set artifactory.metrics.enabled=true --set artifactory.openMetrics.enabled=true \
+       --set databaseUpgradeReady=true --set postgresql.postgresqlPassword=$POSTGRES_PASSWORD --set nginx.service.ssloffload=true \
+       --set newrelic.license_key=$NEWRELIC_LICENSE_KEY \
+       --set jfrog.observability.jpd_url=$JPD_URL \
+       --set jfrog.observability.username=$JPD_ADMIN_USERNAME \
+       --set jfrog.observability.common_jpd=$COMMON_JPD \
        -f helm/artifactory-ha-values.yaml
-```
-
-Xray ⎈:
-
-Update the following fields in `/helm/xray-values.yaml`:
-
-Replace the `newrelic_licensekey` in `newrelic.licensekey` at the end of the yaml file with License key copied from New Relic in [NewRelic Setup](#newrelic-setup)
-
-Replace `jpd_url` in `jfrog.observability.jpd_url` with Artifactory JPD URL (note - if deployed on K8s use the localhost and port number combination per sidecar)
-
-Replace `jfrog_user` in `jfrog.observability.username` with Artifactory username for authentication
-
-Replace `jfrog_api_key` in `jfrog.observability.apikey` with [Artifactory API Key](https://www.jfrog.com/confluence/display/JFROG/User+Profile#UserProfile-APIKey)
-
-Use the same `joinKey` as you used in Artifactory installation to allow Xray node to successfully connect to Artifactory.
-
-```text
-helm upgrade --install xray jfrog/xray --set xray.jfrogUrl=http://my-artifactory-nginx-url \
-       --set xray.masterKey=FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF \
-       --set xray.joinKey=EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE \
-       -f helm/xray-values.yaml
-```
-
-## Fluentd Configuration for NewRelic
-
-Download and configure the relevant fluentd.conf files for New Relic
-
-### Configuration steps for Artifactory
-
-Download the artifactory fluentd configuration file to a directory the user has permissions to write, such as the $JF_PRODUCT_DATA_INTERNAL locations discussed above in the [Environment Configuration](#environment-configuration) section.
-
-````text
-cd $JF_PRODUCT_DATA_INTERNAL
-wget https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/master/fluent.conf.rt
-````
-
-#### Logs data
-
-Override the match directive(jfrog.**) of the downloaded `fluent.conf.rt`  to send logs data to New Relic
-
-```
-<match jfrog.**>
-  @type newrelic
-  license_key LICENSE_KEY
-  logtype "jfrog_artifactory_logs"
-</match>
-```
-
-_**required**_: ```LICENSE_KEY``` is the License Key from New Relic in [NewRelic Setup](#newrelic-setup)
-
-#### OpenMetrics data
-
-Override the source directive of the downloaded `fluent.conf.rt` in order to source metrics from Artifactory
-
-```
-<source>
-  @type jfrog_metrics
-  @id metrics_http_jfrt
-  tag jfrog.metrics.artifactory
-  interval 5s
-  metric_prefix 'jfrog.artifactory'
-  jpd_url JPD_URL
-  username ADMIN_USERNAME
-  apikey JFROG_API_KEY
-  token JFROG_ACCESS_TOKEN
-  target_platform "NEWRELIC"
-  common_jpd COMMON_JPD
-</source>
-```
-_**required**_: ```JPD_URL``` is the Artifactory JPD URL of the format `http://<ip_address>`
-
-_**required**_: ```ADMIN_USERNAME``` is the Artifactory username for authentication
-
-_**required**_: ```JFROG_API_KEY``` is the [Artifactory API Key](https://www.jfrog.com/confluence/display/JFROG/User+Profile#UserProfile-APIKey) for authentication
-
-_**required**_: ```JFROG_ACCESS_TOKEN``` is the [Artifactory Scoped Token](https://www.jfrog.com/confluence/display/JFROG/Access+Tokens#AccessTokens-GeneratingAdminTokens)
-
-_**required**_: ```COMMON_JPD``` is true for non-kubernetes installations or installations where JPD base URL is same to access both Artifactory and Xray (ex: https://sample_base_url/artifactory or https://sample_base_url/xray). Default value is false
-
-Override the match directive of the downloaded `fluent.conf.rt` in order to send metrics to New Relic
-
-```
-<match jfrog.metrics.**>
-  @type jfrog_send_metrics
-  target_platform "NEWRELIC"
-  apikey LICENSE_KEY
-  url "https://metric-api.newrelic.com/metric/v1"
-</match>
-```
-
-_**required**_: ```LICENSE_KEY``` is the License Key from New Relic in [NewRelic Setup](#newrelic-setup)
-
-_**required**_: ```URL``` replace if in EU region with `https://metric-api.eu.newrelic.com/metric/v1`. Default value is `https://metric-api.newrelic.com/metric/v1`
-
-### Configuration steps for Xray
-
-Download the Xray fluentd configuration file to a directory the user has permissions to write, such as the $JF_PRODUCT_DATA_INTERNAL locations discussed above in the [Environment Configuration](#environment-configuration) section.
-
-````text
-cd $JF_PRODUCT_DATA_INTERNAL
-wget https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/master/fluent.conf.xray
-````
-#### Logs and Violation data
-
-Override the source directive of the downloaded `fluent.conf.xray` to pull Xray Violations
-
-```
-<source>
-  @type jfrog_siem
-  tag jfrog.xray.siem.vulnerabilities
-  jpd_url JPD_URL
-  username ADMIN_USERNAME
-  apikey JFROG_API_KEY
-  pos_file_path "#{ENV['JF_PRODUCT_DATA_INTERNAL']}/log/jfrog_siem.log.pos"
-  from_date "2016-01-01"
-</source>
-```
-
-_**required**_: ```JPD_URL``` is the Artifactory JPD URL of the format `http://<ip_address>` with is used to pull Xray Violations
-
-_**required**_: ```ADMIN_USERNAME``` is the Artifactory username for authentication
-
-_**required**_: ```JFROG_API_KEY``` is the [Artifactory API Key](https://www.jfrog.com/confluence/display/JFROG/User+Profile#UserProfile-APIKey) for authentication
-
-_**optional**_: If not specified, value is set to current date. Setting from_date value will result in violations from the specified date
-
-Override the match directive of the downloaded `fluent.conf.xray` to send Logs and Violations to New Relic
-
-```
-<match jfrog.**>
-  @type newrelic
-  license_key LICENSE_KEY
-  logtype "jfrog_artifactory_logs"
-</match>
-```
-
-_**required**_: ```LICENSE_KEY``` is the License Key from New Relic in [NewRelic Setup](#newrelic-setup)
-
-#### OpneMetrics data
-
-Override the source directive of the downloaded `fluent.conf.xray` in order to source metrics from Xray
-
-```
-<source>
-  @type jfrog_metrics
-  @id metrics_http_jfrt
-  tag jfrog.metrics.xray
-  interval 5s
-  metric_prefix 'jfrog.xray'
-  jpd_url JPD_URL
-  username ADMIN_USERNAME
-  apikey JFROG_API_KEY
-  target_platform "NEWRELIC"
-</source>
-```
-
-_**required**_: ```JPD_URL``` is the Artifactory JPD URL of the format `http://<ip_address>` with is used to pull Xray Violations
-
-_**required**_: ```ADMIN_USERNAME``` is the Artifactory username for authentication
-
-_**required**_: ```JFROG_API_KEY``` is the [Artifactory API Key](https://www.jfrog.com/confluence/display/JFROG/User+Profile#UserProfile-APIKey) for authentication
-
-Override the match directive of the downloaded `fluent.conf.rt` in order to send metrics to New Relic
-
-```
-<match jfrog.metrics.**>
-  @type jfrog_send_metrics
-  target_platform "NEWRELIC"
-  apikey LICENSE_KEY
-  url "https://metric-api.newrelic.com/metric/v1"
-</match>
-```
-
-_**required**_: ```LICENSE_KEY``` is the License Key from New Relic in [NewRelic Setup](#newrelic-setup)
-
-_**required**_: ```URL``` replace if in EU region with `https://metric-api.eu.newrelic.com/metric/v1`. Default value is `https://metric-api.newrelic.com/metric/v1`
-
-### Configuration steps for Nginx
-
-Download the Nginx fluentd configuration file to a directory the user has permissions to write, such as the $JF_PRODUCT_DATA_INTERNAL locations discussed above in the [Environment Configuration](#environment-configuration) section.
-
-````text
-cd $JF_PRODUCT_DATA_INTERNAL
-wget https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/master/fluent.conf.nginx
-````
-
-Override the match directive(last section) of the downloaded `fluent.conf.nginx` with the details given below
-
-```
-<match jfrog.**>
-  @type newrelic
-  license_key LICENSE_KEY
-  logtype "jfrog_nginx_logs"
-</match>
-```
-
-_**required**_: ```LICENSE_KEY``` is the License Key from New Relic in [NewRelic Setup](#newrelic-setup)
-
-### Configuration steps for Mission Control
-
-Download the Mission Control fluentd configuration file to a directory the user has permissions to write, such as the $JF_PRODUCT_DATA_INTERNAL locations discussed above in the [Environment Configuration](#environment-configuration) section.
-
-````text
-cd $JF_PRODUCT_DATA_INTERNAL
-wget https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/master/fluent.conf.missioncontrol
-````
-
-Override the match directive(last section) of the downloaded `fluent.conf.missioncontrol` with the details given below
-
-```
-<match jfrog.**>
-  @type newrelic
-  license_key LICENSE_KEY
-  logtype "jfrog_missioncontrol_logs"
-</match>
-```
-
-_**required**_: ```LICENSE_KEY``` is the License Key from New Relic in [NewRelic Setup](#newrelic-setup)
-
-### Configuration steps for Distribution
-
-Download the distribution fluentd configuration file to a directory the user has permissions to write, such as the $JF_PRODUCT_DATA_INTERNAL locations discussed above in the [Environment Configuration](#environment-configuration) section.
-
-````text
-cd $JF_PRODUCT_DATA_INTERNAL
-wget https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/master/fluent.conf.distribution
-````
-
-Override the match directive(last section) of the downloaded `fluent.conf.distribution` with the details given below
-
-```
-<match jfrog.**>
-  @type newrelic
-  license_key LICENSE_KEY
-  logtype "jfrog_distribution_logs"
-</match>
-```
-
-_**required**_: ```LICENSE_KEY``` is the License Key from New Relic in [NewRelic Setup](#newrelic-setup)
-
-### Configuration steps for Pipelines
-
-Download the pipelines fluentd configuration file to a directory the user has permissions to write, such as the $JF_PRODUCT_DATA_INTERNAL locations discussed above in the [Environment Configuration](#environment-configuration) section.
-
-````text
-cd $JF_PRODUCT_DATA_INTERNAL
-wget https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/master/fluent.conf.pipelines
-````
-
-Override the match directive(last section) of the downloaded `fluent.conf.pipelines` with the details given below
-
-```
-<match jfrog.**>
-  @type newrelic
-  license_key LICENSE_KEY
-  logtype "jfrog_pipelines_logs"
-</match>
-```
-
-_**required**_: ```LICENSE_KEY``` is the License Key from New Relic in [NewRelic Setup](#newrelic-setup)
+   ```
+
+#### Xray ⎈:
+
+1. Create a secret for JFrog's admin token - [Access Token](https://jfrog.com/help/r/how-to-generate-an-access-token-video/artifactory-creating-access-tokens-in-artifactory) using any of the following methods
+   ```shell
+   kubectl create secret generic jfrog-admin-token --from-file=token=<path_to_token_file>
+   
+   OR
+   
+   kubectl create secret generic jfrog-admin-token --from-literal=token=<JFROG_ADMN_TOKEN>
+   ```
+2. Download the .env file from [here](https://github.com/jfrog/log-analytics-newrelic/raw/master/helm/jfrog_helm.env). Fill in the jfrog_helm.env file with correct values.
+
+   * **NEWRELIC_LICENSE_KEY**: License Key from [NewRelic](https://one.newrelic.com/launcher/api-keys-ui.api-keys-launcher)
+   * **JPD_URL**: Artifactory JPD URL of the format `http://<ip_address>`
+   * **JPD_ADMIN_USERNAME**: Artifactory username for authentication
+   * **COMMON_JPD**: This flag should be set as true only for non-kubernetes installations or installations where JPD base URL is same to access both Artifactory and Xray (ex: https://sample_base_url/artifactory or https://sample_base_url/xray)
+
+   Apply the .env files and then run the helm command below
+
+   ````shell
+   source jfrog_helm.env
+   ````
+3. Use the same `joinKey` as you used in Artifactory installation to allow Xray node to successfully connect to Artifactory and use the command below to install/upgrade Xray
+
+   ```text
+   helm upgrade --install xray jfrog/xray --set xray.jfrogUrl=http://artifactory-ha-nginx \
+          --set xray.masterKey=FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF \
+          --set xray.joinKey=EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE \
+          --set newrelic.license_key=$NEWRELIC_LICENSE_KEY \
+          --set jfrog.observability.jpd_url=$JPD_URL \
+          --set jfrog.observability.username=$JPD_ADMIN_USERNAME \
+          --set jfrog.observability.common_jpd=$COMMON_JPD \
+          -f helm/xray-values.yaml
+   ```
 
 ## Dashboards
 

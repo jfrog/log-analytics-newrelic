@@ -23,18 +23,12 @@ common:
         - >
           mkdir -p {{ .Values.xray.persistence.mountPath }}/etc/fluentd/;
           curl https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/master/fluent.conf.xray -o {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluentd.conf;
-          cp {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluentd.conf  {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
-          sed -i -e 's|JPD_URL|{{ .Values.xray.jfrogUrl }}|g' {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
-          sed -i -e 's/ADMIN_USERNAME/{{ .Values.jfrog.observability.username }}/' {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
-          sed -i -e 's/JFROG_API_KEY/{{ .Values.jfrog.observability.apikey }}/' {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
-          sed -i -e 's/LICENSE_KEY/{{ .Values.newrelic.licensekey }}/g' {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf;
-          mv {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluent.tmp.conf {{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluentd.conf;
       volumeMounts:
         - mountPath: "{{ .Values.xray.persistence.mountPath }}"
           name: data-volume
   customSidecarContainers: |
     - name: "xray-platform-fluentd-sidecar"
-      image: "partnership-public-images.jfrog.io/fluentd/fluentd:1.22.0"
+      image: "releases-pts-observability-fluentd.jfrog.io/fluentd:2.1"
       imagePullPolicy: "IfNotPresent"
       volumeMounts:
         - mountPath: "{{ .Values.xray.persistence.mountPath }}"
@@ -44,10 +38,23 @@ common:
           value: {{ .Values.xray.persistence.mountPath }}
         - name: FLUENTD_CONF
           value: ../../../../{{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluentd.conf
+        - name: JPD_URL
+          value: {{ .Values.jfrog.observability.jpd_url }}
+        - name: JPD_ADMIN_USERNAME
+          value: {{ .Values.jfrog.observability.username }}
+        - name: JPD_ADMIN_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-admin-token
+              key: token
+        - name: COMMON_JPD
+          value: {{ .Values.jfrog.observability.common_jpd | quote }}
+        - name: NEWRELIC_LICENSE_KEY
+          value: {{ .Values.newrelic.license_key }}
 newrelic:
-  licensekey: newrelic_licensekey
+  license_key: NEWRELIC_LICENSE_KEY
 jfrog:
   observability:
-    jpd_url: jpd_url
-    username: jfrog_user
-    apikey: jfrog_api_key
+    jpd_url: JPD_URL
+    username: JPD_ADMIN_USERNAME
+    common_jpd: COMMON_JPD
