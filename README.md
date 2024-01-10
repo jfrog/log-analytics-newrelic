@@ -81,7 +81,7 @@ gem install fluent-plugin-jfrog-send-metrics
 ```
 
 #### Configure Fluentd
-We rely heavily on environment variables so that the correct log files are streamed to your observability dashboards. Ensure that you fill in the .env file with correct values. Download the .env file from [here](https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/master/.env_jfrog)
+We rely heavily on environment variables so that the correct log files are streamed to your observability dashboards. Ensure that you fill in the .env file with correct values. Download the jfrog.env file from [here](https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/master/jfrog.env)
 
 * **JF_PRODUCT_DATA_INTERNAL**: The environment variable JF_PRODUCT_DATA_INTERNAL must be defined to the correct location. For each JFrog service you will find its active log files in the `$JFROG_HOME/<product>/var/log` directory
 * **NEWRELIC_LICENSE_KEY**: License Key from [NewRelic](https://one.newrelic.com/launcher/api-keys-ui.api-keys-launcher)
@@ -93,7 +93,7 @@ We rely heavily on environment variables so that the correct log files are strea
 Apply the .env files and then run the fluentd wrapper with one argument pointed to the `fluent.conf.*` file configured.
 
 ````shell
-source .env_jfrog
+source jfrog.env
 ./fluentd $JF_PRODUCT_DATA_INTERNAL/fluent.conf.<product_name>
 ````
 
@@ -107,9 +107,9 @@ In order to run fluentd as a docker image to send the log, siem and metrics data
 
 	* Download Dockerfile from [here](https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/master/docker-build/Dockerfile) to any directory which has write permissions.
 
-3. Download the Dockerenvfile_<observability_platform>.txt file needed to run Jfrog/FluentD Docker Images for the intended observability platform,
+3. Download the docker.env file needed to run Jfrog/FluentD Docker Images for the intended observability platform,
 
-	* Download Dockerenvfile_newrelic.txt from [here](https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/master/docker-build/Dockerenvfile_newrelic.txt) to the directory where the docker file was downloaded.
+	* Download docker.env from [here](https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/master/docker-build/docker.env) to the directory where the docker file was downloaded.
 
 ```text
 
@@ -123,7 +123,7 @@ For NewRelic as the observability platform, execute these commands to setup the 
 
     The above command will build the docker image.
 
-2. Fill the necessary information in the Dockerenvfile.txt file
+2. Fill the necessary information in the docker.env file
 
     JF_PRODUCT_DATA_INTERNAL: The environment variable JF_PRODUCT_DATA_INTERNAL must be defined to the correct location. It will be the directory where logs are mounted ex: /var/opt/jfrog/artifactory
     NEWRELIC_LICENSE_KEY: License Key from [NewRelic](https://one.newrelic.com/launcher/api-keys-ui.api-keys-launcher)
@@ -132,13 +132,13 @@ For NewRelic as the observability platform, execute these commands to setup the 
     JPD_ADMIN_TOKEN: Artifactory [Access Token](https://jfrog.com/help/r/how-to-generate-an-access-token-video/artifactory-creating-access-tokens-in-artifactory) for authentication
     COMMON_JPD: This flag should be set as true only for non-kubernetes installations or installations where JPD base URL is same to access both Artifactory and Xray (ex: https://sample_base_url/artifactory or https://sample_base_url/xray)
 
-3. Execute 'docker run -it --name jfrog-fluentd-newrelic-rt -v <path_to_logs>:/var/opt/jfrog/artifactory --env-file Dockerenvfile.txt <image_name>' 
+3. Execute 'docker run -it --name jfrog-fluentd-newrelic-rt -v <path_to_logs>:/var/opt/jfrog/artifactory --env-file docker.env <image_name>'
 
     The <path_to_logs> should be an absolute path where the Jfrog Artifactory Logs folder resides, i.e for an Docker based Artifactory Installation,  ex: /var/opt/jfrog/artifactory/var/logs on the docker host.
 
     Command example
 
-    'docker run -it --name jfrog-fluentd-newrelic-rt -v $JFROG_HOME/artifactory/var/:/var/opt/jfrog/artifactory --env-file Dockerenvfile.txt jfrog/fluentd-newrelic-rt'
+    'docker run -it --name jfrog-fluentd-newrelic-rt -v $JFROG_HOME/artifactory/var/:/var/opt/jfrog/artifactory --env-file docker.env jfrog/fluentd-newrelic-rt'
 
 
 ```
@@ -182,7 +182,7 @@ Replace placeholders with your ``masterKey`` and ``joinKey``. To generate each o
     
     kubectl create secret generic jfrog-admin-token --from-literal=token=<JFROG_ADMN_TOKEN>
     ```
-3. For Artifactory installation, download the .env file from [here](https://github.com/jfrog/log-analytics-newrelic/raw/master/helm/.env_jfrog_helm). Fill in the .env_jfrog_helm file with correct values.
+3. For Artifactory installation, download the .env file from [here](https://github.com/jfrog/log-analytics-newrelic/raw/master/helm/jfrog_helm.env). Fill in the jfrog_helm.env file with correct values.
 
     * **NEWRELIC_LICENSE_KEY**: License Key from [NewRelic](https://one.newrelic.com/launcher/api-keys-ui.api-keys-launcher)
     * **JPD_URL**: Artifactory JPD URL of the format `http://<ip_address>`
@@ -192,7 +192,7 @@ Replace placeholders with your ``masterKey`` and ``joinKey``. To generate each o
    Apply the .env files using the helm command below
 
     ````shell
-    source .env_jfrog_helm
+    source jfrog_helm.env
     ````
 
 4. Postgres password is required to upgrade Artifactory. Run the following command to get the current password
@@ -237,7 +237,7 @@ Replace placeholders with your ``masterKey`` and ``joinKey``. To generate each o
    
    kubectl create secret generic jfrog-admin-token --from-literal=token=<JFROG_ADMN_TOKEN>
    ```
-4. Download the .env file from [here](https://github.com/jfrog/log-analytics-newrelic/raw/master/helm/.env_jfrog_helm). Fill in the .env_jfrog_helm file with correct values.
+4. Download the .env file from [here](https://github.com/jfrog/log-analytics-newrelic/raw/master/helm/jfrog_helm.env). Fill in the jfrog_helm.env file with correct values.
 
     * **NEWRELIC_LICENSE_KEY**: License Key from [NewRelic](https://one.newrelic.com/launcher/api-keys-ui.api-keys-launcher)
     * **JPD_URL**: Artifactory JPD URL of the format `http://<ip_address>`
@@ -247,7 +247,7 @@ Replace placeholders with your ``masterKey`` and ``joinKey``. To generate each o
    Apply the .env files and then run the helm command below
 
    ````shell
-   source .env_jfrog_helm
+   source jfrog_helm.env
    ````
 5. Postgres password is required to upgrade Artifactory. Run the following command to get the current password
    ```shell
@@ -277,7 +277,7 @@ Replace placeholders with your ``masterKey`` and ``joinKey``. To generate each o
    
    kubectl create secret generic jfrog-admin-token --from-literal=token=<JFROG_ADMN_TOKEN>
    ```
-2. Download the .env file from [here](https://github.com/jfrog/log-analytics-newrelic/raw/master/helm/.env_jfrog_helm). Fill in the .env_jfrog_helm file with correct values.
+2. Download the .env file from [here](https://github.com/jfrog/log-analytics-newrelic/raw/master/helm/jfrog_helm.env). Fill in the jfrog_helm.env file with correct values.
 
    * **NEWRELIC_LICENSE_KEY**: License Key from [NewRelic](https://one.newrelic.com/launcher/api-keys-ui.api-keys-launcher)
    * **JPD_URL**: Artifactory JPD URL of the format `http://<ip_address>`
@@ -287,7 +287,7 @@ Replace placeholders with your ``masterKey`` and ``joinKey``. To generate each o
    Apply the .env files and then run the helm command below
 
    ````shell
-   source .env_jfrog_helm
+   source jfrog_helm.env
    ````
 3. Use the same `joinKey` as you used in Artifactory installation to allow Xray node to successfully connect to Artifactory and use the command below to install/upgrade Xray
 
