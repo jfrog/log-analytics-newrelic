@@ -2,6 +2,11 @@
 
 All changes to the New Relic log analytics integration will be documented in this file.
 
+## [0.4.0] - April 12, 2024
+
+* Bump fluentd sidecar image to 4.2
+* Revamp Readme's Artifactory and Xray installation instructions
+
 ## [0.3.0] - April 11, 2024
 
 * Fix Artifactory access's regex to match log input changes
