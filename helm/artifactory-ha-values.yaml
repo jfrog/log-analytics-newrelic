@@ -38,8 +38,14 @@ artifactory:
           value: {{ .Values.newrelic.license_key }}
         - name: FLUENTD_CONF
           value: ../../../../{{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf
+        - name NEWRELIC_LOGS_URI
+          value {{ default https://log-api.newrelic.com/log/v1 .Values.newrelic.logs_uri }}
+        - name NEWRELIC_METRICS_URI
+          value {{ default https://metric-api.newrelic.com/metric/v1 .Values.newrelic.metrics_uri }}
 newrelic:
   license_key: NEWRELIC_LICENSE_KEY
+  logs_uri: NEWRELIC_LOGS_URI
+  metrics_uri: NEWRELIC_METRICS_URI
 jfrog:
   observability:
     jpd_url: JPD_URL
