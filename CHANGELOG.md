@@ -2,6 +2,10 @@
 
 All changes to the New Relic log analytics integration will be documented in this file.
 
+## [0.5.0] - April 19, 2024
+
+* Fix fluentd regex to fetch correctly docker image and repo names
+
 ## [0.4.0] - April 12, 2024
 
 * Bump fluentd sidecar image to 4.2
