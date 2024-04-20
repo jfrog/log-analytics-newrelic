@@ -5,6 +5,8 @@ All changes to the New Relic log analytics integration will be documented in thi
 ## [0.5.0] - April 19, 2024
 
 * Fix fluentd regex to fetch correctly docker image and repo names
+* Make New Relic's SaaS logs and metrics endpoints configurable
+* Fix order of request and response content length to match spec
 
 ## [0.4.0] - April 12, 2024
 
