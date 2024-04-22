@@ -15,7 +15,7 @@
   @type jfrog_send_metrics
   target_platform "NEWRELIC"
   apikey "#{ENV['NEWRELIC_LICENSE_KEY']}"
-  url "https://metric-api.newrelic.com/metric/v1"
+  url "#{ENV['NEWRELIC_METRICS_URI']}"
 </match>
 
 # ALL CALLHOME
@@ -159,7 +159,7 @@
   tag jfrog.rt.access.request
   <parse>
     @type regexp
-    expression ^(?<log_timestamp>[^ ]*)\|(?<trace_id>[^\|]*)\|(?<remote_address>[^\|]*)\|(?<username>[^\|]*)\|(?<request_method>[^\|]*)\|(?<request_url>[^\|]*)\|(?<return_status>[^\|]*)\|(?<response_content_length>[^\|]*)\|(?<request_content_length>[^\|]*)\|(?<request_duration>[^\|]*)\|(?<request_user_agent>.+)$
+    expression ^(?<log_timestamp>[^ ]*)\|(?<trace_id>[^\|]*)\|(?<remote_address>[^\|]*)\|(?<username>[^\|]*)\|(?<request_method>[^\|]*)\|(?<request_url>[^\|]*)\|(?<return_status>[^\|]*)\|(?<request_content_length>[^\|]*)\|(?<response_content_length>[^\|]*)\|(?<request_duration>[^\|]*)\|(?<request_user_agent>.+)$
     types response_content_length:integer, request_content_length:integer, return_status:integer
   </parse>
 </source>
@@ -211,7 +211,7 @@
   tag jfrog.rt.request.out
   <parse>
     @type regexp
-    expression ^(?<log_timestamp>[^ ]*)\|(?<trace_id>[^\|]*)\|(?<remote_repo_name>[^\|]*)\|(?<username>[^\|]*)\|(?<request_method>[^\|]*)\|(?<remote_url>[^\|]*)\|(?<return_status>[^\|]*)\|(?<response_content_length>[^\|]*)\|(?<request_content_length>[^\|]*)\|(?<request_duration>[^\|]*)$
+    expression ^(?<log_timestamp>[^ ]*)\|(?<trace_id>[^\|]*)\|(?<remote_repo_name>[^\|]*)\|(?<username>[^\|]*)\|(?<request_method>[^\|]*)\|(?<remote_url>[^\|]*)\|(?<return_status>[^\|]*)\|(?<request_content_length>[^\|]*)\|(?<response_content_length>[^\|]*)\|(?<request_duration>[^\|]*)$
   </parse>
 </source>
 ## ACCESS LOG
@@ -304,15 +304,15 @@
     key_name message
     <parse>
       @type regexp
-      expression ^(?<log_timestamp>[^ ]*)\|(?<trace_id>[^\|]*)\|(?<remote_address>[^\|]*)\|(?<username>[^\|]*)\|(?<request_method>[^\|]*)\|(?<request_url>[^\|]*)\|(?<return_status>[^\|]*)\|(?<response_content_length>[^\|]*)\|(?<request_content_length>[^\|]*)\|(?<request_duration>[^\|]*)\|(?<request_user_agent>.+)$
+      expression ^(?<log_timestamp>[^ ]*)\|(?<trace_id>[^\|]*)\|(?<remote_address>[^\|]*)\|(?<username>[^\|]*)\|(?<request_method>[^\|]*)\|(?<request_url>[^\|]*)\|(?<return_status>[^\|]*)\|(?<request_content_length>[^\|]*)\|(?<response_content_length>[^\|]*)\|(?<request_duration>[^\|]*)\|(?<request_user_agent>.+)$
     </parse>
   </filter>
   <filter jfrog.rt.artifactory.request>
     @type record_transformer
     enable_ruby true
     <record>
-      repo ${record["request_url"].include?("/api/docker") && !record["request_url"].include?("/api/docker/null") && !record["request_url"].include?("/api/docker/v2") ? (record["request_url"].split('/')[3]) : ("")}
-      image ${record["request_url"].include?("/api/docker") && !record["request_url"].include?("/api/docker/null") && !record["request_url"].include?("/api/docker/v2")  ? (record["request_url"].split('/')[5]) : ("")}
+      repo ${record["request_url"].strip().include?("/api/docker") && !record["request_url"].include?("/api/docker/null") && !record["request_url"].include?("/api/docker/v2") && !record["request_url"].include?("v2/token") ? (record["request_url"].strip())[/api\/docker\/(.+)\/(?:v2)/, 1] : ("")}
+      image ${record["request_url"].strip().include?("/api/docker") && !record["request_url"].include?("/api/docker/null") && !record["request_url"].include?("/api/docker/v2") && !record["request_url"].include?("v2/token") ? (record["request_url"].strip())[/v2\/(.+)\/(?:manifests|blobs)/, 1] : ("")}
     </record>
   </filter>
   <filter jfrog.rt.artifactory.request>
@@ -328,7 +328,7 @@
     key_name message
     <parse>
       @type regexp
-      expression ^(?<log_timestamp>[^\|]*)\|(?<trace_id>[^\|]*)\|(?<remote_address>[^\|]*)\|(?<username>[^\|]*)\|(?<request_method>[^\|]*)\|(?<request_url>[^\|]*)\|(?<return_status>[^\|]*)\|(?<response_content_length>[^\|]*)\|(?<request_content_length>[^\|]*)\|(?<request_duration>[^\|]*)\|(?<request_user_agent>.+)$
+      expression ^(?<log_timestamp>[^\|]*)\|(?<trace_id>[^\|]*)\|(?<remote_address>[^\|]*)\|(?<username>[^\|]*)\|(?<request_method>[^\|]*)\|(?<request_url>[^\|]*)\|(?<return_status>[^\|]*)\|(?<request_content_length>[^\|]*)\|(?<response_content_length>[^\|]*)\|(?<request_duration>[^\|]*)\|(?<request_user_agent>.+)$
     </parse>
   </filter>
   <filter jfrog.rt.metadata.request>
@@ -336,7 +336,7 @@
     key_name message
     <parse>
       @type regexp
-      expression ^(?<log_timestamp>[^ ]*)\|(?<trace_id>[^\|]*)\|(?<remote_address>[^\|]*)\|(?<username>[^\|]*)\|(?<request_method>[^\|]*)\|(?<request_url>[^\|]*)\|(?<return_status>[^\|]*)\|(?<response_content_length>[^\|]*)\|(?<request_content_length>[^\|]*)\|(?<request_duration>[^\|]*)\|(?<request_user_agent>.+)$
+      expression ^(?<log_timestamp>[^ ]*)\|(?<trace_id>[^\|]*)\|(?<remote_address>[^\|]*)\|(?<username>[^\|]*)\|(?<request_method>[^\|]*)\|(?<request_url>[^\|]*)\|(?<return_status>[^\|]*)\|(?<request_content_length>[^\|]*)\|(?<response_content_length>[^\|]*)\|(?<request_duration>[^\|]*)\|(?<request_user_agent>.+)$
     </parse>
   </filter>
   ## ACCESS LOGS
@@ -365,6 +365,7 @@
   <match jfrog.**>
     @type newrelic
     license_key "#{ENV['NEWRELIC_LICENSE_KEY']}"
+    base_uri "#{ENV['NEWRELIC_LOGS_URI']}"
     logtype "jfrog_artifactory_logs"
   </match>
 </label>

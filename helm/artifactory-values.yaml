@@ -3,6 +3,7 @@ artifactory:
   customInitContainersBegin: |
     - name: "download-fluentd-conf-on-persistent-volume"
       image: "{{ .Values.initContainerImage }}"
+      image: "{{ .Values.initContainerImage }}"
       imagePullPolicy: "{{ .Values.artifactory.image.pullPolicy }}"
       command:
         - 'sh'
@@ -38,8 +39,14 @@ artifactory:
           value: {{ .Values.newrelic.license_key }}
         - name: FLUENTD_CONF
           value: ../../../../{{ .Values.artifactory.persistence.mountPath }}/etc/fluentd/fluentd.conf
+        - name: NEWRELIC_LOGS_URI
+          value: {{ .Values.newrelic.logs_uri }}
+        - name: NEWRELIC_METRICS_URI
+          value: {{ .Values.newrelic.metrics_uri }}
 newrelic:
   license_key: NEWRELIC_LICENSE_KEY
+  logs_uri: https://log-api.newrelic.com
+  metrics_uri: https://metrics-api.newrelic.com
 jfrog:
   observability:
     jpd_url: JPD_URL
