@@ -26,13 +26,15 @@ New Relic setup can be done by going through the onboarding steps below or by us
 
 ## JFrog Metrics Setup
 
-To enable metrics in Artifactory, make the following configuration changes to the [Artifactory System YAML](https://www.jfrog.com/confluence/display/JFROG/Artifactory+System+YAML)
+For non-kubernetes installations, to enable metrics in Artifactory, make the following configuration changes to the [Artifactory System YAML](https://www.jfrog.com/confluence/display/JFROG/Artifactory+System+YAML)
 
 ```yaml
-artifactory:
+shared:
     metrics:
         enabled: true
-    openMetrics:
+
+artifactory:
+    metrics:
         enabled: true
 ```
 
@@ -94,8 +96,8 @@ We rely heavily on environment variables so that the correct log files are strea
 * **JPD_ADMIN_USERNAME**: Artifactory username for authentication
 * **JPD_ADMIN_TOKEN**: Artifactory [Access Token](https://jfrog.com/help/r/how-to-generate-an-access-token-video/artifactory-creating-access-tokens-in-artifactory) for authentication
 * **COMMON_JPD**: This flag should be set as true only for non-kubernetes installations or installations where JPD base URL is same to access both Artifactory and Xray (ex: https://sample_base_url/artifactory or https://sample_base_url/xray)
-* **NEWRELIC_LOGS_URI**: This New Relic logs endpoint needs to be set if your New Relic instance is in the EU region (or if any other custom configuration is needed). It defaults to https://log-api.newrelic.com/log/v1
-* **NEWRELIC_METRICS_URI**: This New Relic metrics endpoint needs to be set if your New Relic instance is in the EU region (or if any other custom configuration is needed). It defaults to https://metric-api.newrelic.com/metric/v1
+* **NEWRELIC_LOGS_URI**: This New Relic logs endpoint needs to be set if your New Relic instance is in the EU region (or if any other custom configuration is needed). Toy can use https://log-api.newrelic.com/log/v1 as the default value, unless you are in the non-default New Relic region
+* **NEWRELIC_METRICS_URI**: This New Relic metrics endpoint needs to be set if your New Relic instance is in the EU region (or if any other custom configuration is needed). You can use https://metric-api.newrelic.com/metric/v1 as the default value, unless you are in the non-default New Relic region
 
 Apply the .env files and then run the fluentd wrapper with one argument pointed to the `fluent.conf.*` file configured.
 
@@ -118,8 +120,8 @@ In order to run fluentd as a docker image to send the log, siem and metrics data
    * Download docker.env from [here](https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/master/docker-build/docker.env) to the directory where the docker file was downloaded.
 
 ```text
-* **NEWRELIC_LOGS_URI**: This New Relic logs endpoint needs to be set if your New Relic instanceif your New Relic instance is in the EU region (or if any other custom configuration is needed). It defaults to https://log-api.newrelic.com/log/v1 if isn't set.
-* **NEWRELIC_METRICS_URI**: This New Relic metrics endpoint needs to be set if your New Relic instance is in the EU region (or if any other custom configuration is needed). It defaults to https://metric-api.newrelic.com/metric/v1 if isn't set.
+* **NEWRELIC_LOGS_URI**: This New Relic logs endpoint needs to be set if your New Relic instance if your New Relic instance is in the EU region (or if any other custom configuration is needed). Set to https://log-api.newrelic.com/log/v1 (default logs URI) if you are in the default New Relic region
+* **NEWRELIC_METRICS_URI**: This New Relic metrics endpoint needs to be set if your New Relic instance is in the EU region (or if any other custom configuration is needed). Set to https://metric-api.newrelic.com/metric/v1 (default metrics URI) if you are in the default New Relic region
 For NewRelic as the observability platform, execute these commands to setup the docker container running the fluentd installation
 
 1. Execute 'docker build --build-arg SOURCE="JFRT" --build-arg TARGET="NEWRELIC" -t <image_name> .'
@@ -138,8 +140,8 @@ For NewRelic as the observability platform, execute these commands to setup the 
     JPD_ADMIN_USERNAME: Artifactory username for authentication
     JPD_ADMIN_TOKEN: Artifactory [Access Token](https://jfrog.com/help/r/how-to-generate-an-access-token-video/artifactory-creating-access-tokens-in-artifactory) for authentication
     COMMON_JPD: This flag should be set as true only for non-kubernetes installations or installations where JPD base URL is same to access both Artifactory and Xray (ex: https://sample_base_url/artifactory or https://sample_base_url/xray)
-    NEWRELIC_LOGS_URI: This New Relic logs endpoint needs to be set if your New Relic instance is in the EU region (or if any other custom configuration is needed). It defaults to https://log-api.newrelic.com/log/v1
-    NEWRELIC_METRICS_URI: This New Relic metrics endpoint needs to be set if your New Relic instance is in the EU region (or if any other custom configuration is needed). It defaults to https://metric-api.newrelic.com/metric/v1
+    NEWRELIC_LOGS_URI: This New Relic logs endpoint needs to be set if your New Relic instance is in the EU region (or if any other custom configuration is needed). Set to https://log-api.newrelic.com/log/v1 if you are in the default New Relic region
+    NEWRELIC_METRICS_URI: Optional. This New Relic metrics endpoint needs to be set if your New Relic instance is in the EU region (or if any other custom configuration is needed). Set to https://metric-api.newrelic.com/metric/v1 if you are in the default New Relic region
 
 3. Execute 'docker run -it --name jfrog-fluentd-newrelic-rt -v <path_to_logs>:/var/opt/jfrog/artifactory --env-file docker.env <image_name>'
 
@@ -212,12 +214,11 @@ helm upgrade --install artifactory  jfrog/artifactory \
        --set artifactory.joinKey=$JOIN_KEY \
        --set artifactory.license.secret=artifactory-license \
        --set artifactory.license.dataKey=artifactory.cluster.license \
-       --set artifactory.metrics.enabled=true \
        --set artifactory.openMetrics.enabled=true \
        -n $INST_NAMESPACE
 ```
 
-💡Note: Artifactory metrics are not enabled by default. It is very important to add to the `helm upgrade` command the flag `artifactory.metrics.enabled=true`and`artifactory.metrics.enabled=true` as exampled above
+💡Note: Artifactory metrics are not enabled by default. It is very important to add to the `helm upgrade` command the flag `artifactory.openMetrics.enabled=true` as exampled above
 
 4. Follow the instructions how to get your new Artifactory URL from the helm install output
 
@@ -244,8 +245,8 @@ kubectl create secret generic jfrog-admin-token --from-literal=token=<JFROG_ADMN
 * **JPD_URL**: Artifactory JPD URL of the format `http://<ip_address>`
 * **JPD_ADMIN_USERNAME**: Artifactory username for authentication
 * **COMMON_JPD**: This flag should be set as true only for non-kubernetes installations or installations where JPD base URL is same to access both Artifactory and Xray (ex: https://sample_base_url/artifactory or https://sample_base_url/xray)
-* **NEWRELIC_LOGS_URI**: This New Relic logs endpoint needs to be set if your New Relic instance is in the EU region (or if any other custom configuration is needed). It defaults to https://log-api.newrelic.com/log/v1 if isn't set
-* **NEWRELIC_METRICS_URI**: This New Relic metrics endpoint needs to be set if your New Relic instance is in the EU region (or if any other custom configuration is needed). It defaults to https://metric-api.newrelic.com/metric/v1 if isn't set
+* **NEWRELIC_LOGS_URI**: Optional. This New Relic logs endpoint needs to be set if your New Relic instance is in the EU region (or if any other custom configuration is needed). It defaults to https://log-api.newrelic.com/log/v1 if isn't set
+* **NEWRELIC_METRICS_URI**: Optional. This New Relic metrics endpoint needs to be set if your New Relic instance is in the EU region (or if any other custom configuration is needed). It defaults to https://metric-api.newrelic.com/metric/v1 if isn't set
 
 Apply the .env files using the helm command below
 
@@ -263,9 +264,8 @@ POSTGRES_PASSWORD=$(kubectl get secret artifactory-postgresql -o jsonpath="{.dat
 
 ```bash
 helm upgrade --install artifactory jfrog/artifactory \
-       --set artifactory.masterKey=$MASTER_KEY \
        --set artifactory.joinKey=$JOIN_KEY \
-       --set artifactory.metrics.enabled=true --set artifactory.openMetrics.enabled=true \
+       --set artifactory.openMetrics.enabled=true \
        --set databaseUpgradeReady=true --set postgresql.postgresqlPassword=$POSTGRES_PASSWORD \
        --set newrelic.license_key=$NEWRELIC_LICENSE_KEY \
        --set jfrog.observability.jpd_url=$JPD_URL \
@@ -278,6 +278,7 @@ helm upgrade --install artifactory jfrog/artifactory \
 ```
 
 💡Note: Setting `newrelic.logs_uri` and `newrelic.metrics_uri` values in the above command is **optional** and only required if your New Relic endpoints isn't the default. For example, if working with New Relic EU servers, make sure to set these env variables
+💡Note: Artifactory metrics are not enabled by default. It is very important to add to the `helm upgrade` command the flag `artifactory.openMetrics.enabled=true` as exampled above
 
 #### Artifactory-HA ⎈:
 
@@ -296,11 +297,11 @@ helm upgrade --install artifactory-ha  jfrog/artifactory-ha \
        --set artifactory.joinKey=$JOIN_KEY \
        --set artifactory.license.secret=artifactory-license \
        --set artifactory.license.dataKey=artifactory.cluster.license \
-       --set artifactory.metrics.enabled=true \
        --set artifactory.openMetrics.enabled=true \
        -n $INST_NAMESPACE
-
 ```
+💡Note: Artifactory metrics are not enabled by default. It is very important to add to the `helm upgrade` command the flag `artifactory.openMetrics.enabled=true` as exampled above
+
 
 4. Follow the instructions how to get your new Artifactory URL from the helm install output
 
@@ -328,8 +329,8 @@ kubectl create secret generic jfrog-admin-token --from-literal=token=<JFROG_ADMN
 * **JPD_URL**: Artifactory JPD URL of the format `http://<ip_address>`
 * **JPD_ADMIN_USERNAME**: Artifactory username for authentication
 * **COMMON_JPD**: This flag should be set as true only for non-kubernetes installations or installations where JPD base URL is same to access both Artifactory and Xray (ex: https://sample_base_url/artifactory or https://sample_base_url/xray)
-* **NEWRELIC_LOGS_URI**: This New Relic logs endpoint needs to be set if your New Relic instance is in the EU region (or if any other custom configuration is needed). It defaults to https://log-api.newrelic.com/log/v1 if isn't set
-* **NEWRELIC_METRICS_URI**: This New Relic metrics endpoint needs to be set if your New Relic instance is in the EU region (or if any other custom configuration is needed). It defaults to https://metric-api.newrelic.com/metric/v1 if isn't set
+* **NEWRELIC_LOGS_URI**: Optional. This New Relic logs endpoint needs to be set if your New Relic instance is in the EU region (or if any other custom configuration is needed). It defaults to https://log-api.newrelic.com/log/v1 if isn't set
+* **NEWRELIC_METRICS_URI**: Optional. This New Relic metrics endpoint needs to be set if your New Relic instance is in the EU region (or if any other custom configuration is needed). It defaults to https://metric-api.newrelic.com/metric/v1 if isn't set
 
 Apply the .env files and then run the helm command below
 
@@ -347,9 +348,8 @@ POSTGRES_PASSWORD=$(kubectl get secret artifactory-ha-postgresql -o jsonpath="{.
 
 ```bash
 helm upgrade --install artifactory-ha  jfrog/artifactory-ha \
-    --set artifactory.masterKey=$MASTER_KEY \
     --set artifactory.joinKey=$JOIN_KEY \
-    --set artifactory.metrics.enabled=true --set artifactory.openMetrics.enabled=true \
+    --set artifactory.openMetrics.enabled=true \
     --set databaseUpgradeReady=true --set postgresql.postgresqlPassword=$POSTGRES_PASSWORD \
     --set newrelic.license_key=$NEWRELIC_LICENSE_KEY \
     --set jfrog.observability.jpd_url=$JPD_URL \
@@ -362,6 +362,7 @@ helm upgrade --install artifactory-ha  jfrog/artifactory-ha \
 ```
 
 💡Note: Setting `newrelic.logs_uri` and `newrelic.metrics_uri` values in the above command is **optional** and only required if your New Relic endpoints isn't the default. For example, if working with New Relic EU servers, make sure to set these env variables
+💡Note: Artifactory metrics are not enabled by default. It is very important to add to the `helm upgrade` command the flag `artifactory.openMetrics.enabled=true` as exampled above
 
 #### Xray ⎈:
 
@@ -381,7 +382,7 @@ kubectl create secret generic jfrog-admin-token --from-literal=token=<JFROG_ADMN
    * **JPD_URL**: Artifactory JPD URL of the format `http://<ip_address>`
    * **JPD_ADMIN_USERNAME**: Artifactory username for authentication
    * **COMMON_JPD**: This flag should be set as true only for non-kubernetes installations or installations where JPD base URL is same to access both Artifactory and Xray (ex: https://sample_base_url/artifactory or https://sample_base_url/xray)
-   * **NEWRELIC_LOGS_URI**: This New Relic logs endpoint needs to be set if your New Relic instance is in the EU region (or if any other custom configuration is needed). It defaults to https://log-api.newrelic.com/log/v1 if isn't set
+   * **NEWRELIC_LOGS_URI**: Optional. This New Relic logs endpoint needs to be set if your New Relic instance is in the EU region (or if any other custom configuration is needed). It defaults to https://log-api.newrelic.com/log/v1 if isn't set
    * **NEWRELIC_METRICS_URI**: This New Relic metrics endpoint needs to be set if your New Relic instance is in the EU region (or if any other custom configuration is needed). It defaults to https://metric-api.newrelic.com/metric/v1 if isn't set
 
    Apply the .env files and then run the helm command below
@@ -399,8 +400,8 @@ kubectl create secret generic jfrog-admin-token --from-literal=token=<JFROG_ADMN
 
    ```bash
    helm upgrade --install xray jfrog/xray --set xray.jfrogUrl=$JPD_URL \
-          --set xray.masterKey=$XRAY_MASTER_KEY \
           --set xray.joinKey=$JOIN_KEY \
+          --set xray.openMetrics.enabled=true \
           --set newrelic.license_key=$NEWRELIC_LICENSE_KEY \
           --set jfrog.observability.jpd_url=$JPD_URL \
           --set jfrog.observability.username=$JPD_ADMIN_USERNAME \
