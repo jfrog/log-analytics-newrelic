@@ -57,8 +57,8 @@ common:
           value: {{ .Values.newrelic.metrics_uri }}
 newrelic:
   license_key: NEWRELIC_LICENSE_KEY
-  logs_uri: https://log-api.newrelic.com
-  metrics_uri: https://metrics-api.newrelic.com
+  logs_uri: https://log-api.newrelic.com/log/v1
+  metrics_uri: https://metric-api.newrelic.com/metric/v1
 jfrog:
   observability:
     jpd_url: JPD_URL

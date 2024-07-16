@@ -15,7 +15,7 @@ artifactory:
           name: artifactory-volume
   customSidecarContainers: |
     - name: "artifactory-fluentd-sidecar"
-      image: "releases-pts-observability-fluentd.jfrog.io/fluentd:4.5"
+      image: "releases-pts-observability-fluentd.jfrog.io/fluentd:4.3"
       imagePullPolicy: "IfNotPresent"
       volumeMounts:
         - mountPath: "{{ .Values.artifactory.persistence.mountPath }}"
@@ -44,8 +44,8 @@ artifactory:
           value: {{ .Values.newrelic.metrics_uri }}
 newrelic:
   license_key: NEWRELIC_LICENSE_KEY
-  logs_uri: https://log-api.newrelic.com
-  metrics_uri: https://metrics-api.newrelic.com
+  logs_uri: https://log-api.newrelic.com/log/v1
+  metrics_uri: https://metric-api.newrelic.com/metric/v1
 jfrog:
   observability:
     jpd_url: JPD_URL
