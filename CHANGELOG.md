@@ -2,7 +2,12 @@
 
 All changes to the New Relic log analytics integration will be documented in this file.
 
+## [0.0.7] - August 8, 2024
+
+* Fix metrics configuration due to deprication of `artifactory.openMetrics` as part of Artifactory 7.87.x charts and renaming it to `artifactory.metrics`
+
 ## [0.0.6] - June 6, 2024
+
 * [BREAKING] Adding deprecation notice for partnership-pts-observability.jfrog.io docker registry
 * FluentD sidecar version bumped to 4.3, to upgrade base image to bitnami/fluentd 1.16.5
 * Update FluentD sidecar helm charts to match recent changes in JFrog's official charts
