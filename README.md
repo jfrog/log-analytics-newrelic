@@ -213,13 +213,12 @@ helm upgrade --install artifactory  jfrog/artifactory \
        --set artifactory.license.secret=artifactory-license \
        --set artifactory.license.dataKey=artifactory.cluster.license \
        --set artifactory.metrics.enabled=true \
-       --set artifactory.openMetrics.enabled=true \
        -n $INST_NAMESPACE
 ```
 
-💡Note: Artifactory metrics are not enabled by default. It is very important to add to the `helm upgrade` command the flag `artifactory.metrics.enabled=true`and`artifactory.metrics.enabled=true` as exampled above
+💡Note: Metrics collection is disabled by default in Artifactory. Please make sure that you are following the above `helm upgrade` command to enable them in Artifactory by setting `artifactory.metrics.enabled=true`. For Artifactory versions <=7.86.x, please enable metrics by setting the flag `artifactory.openMetrics.enabled=true`
 
-4. Follow the instructions how to get your new Artifactory URL from the helm install output
+3. Follow the instructions how to get your new Artifactory URL from the helm install output
 
 ```bash
    export SERVICE_IP=$(kubectl get svc --namespace $INST_NAMESPACE artifactory-artifactory-nginx -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
@@ -265,7 +264,6 @@ POSTGRES_PASSWORD=$(kubectl get secret artifactory-postgresql -o jsonpath="{.dat
 helm upgrade --install artifactory jfrog/artifactory \
        --set artifactory.masterKey=$MASTER_KEY \
        --set artifactory.joinKey=$JOIN_KEY \
-       --set artifactory.metrics.enabled=true --set artifactory.openMetrics.enabled=true \
        --set databaseUpgradeReady=true --set postgresql.postgresqlPassword=$POSTGRES_PASSWORD \
        --set newrelic.license_key=$NEWRELIC_LICENSE_KEY \
        --set jfrog.observability.jpd_url=$JPD_URL \
@@ -297,10 +295,11 @@ helm upgrade --install artifactory-ha  jfrog/artifactory-ha \
        --set artifactory.license.secret=artifactory-license \
        --set artifactory.license.dataKey=artifactory.cluster.license \
        --set artifactory.metrics.enabled=true \
-       --set artifactory.openMetrics.enabled=true \
        -n $INST_NAMESPACE
 
 ```
+
+💡Note: Metrics collection is disabled by default in Artifactory-HA. Please make sure that you are following the above `helm upgrade` command to enable them in Artifactory by setting `artifactory.metrics.enabled=true`. For Artifactory versions <=7.86.x, please enable metrics by setting the flag `artifactory.openMetrics.enabled=true`
 
 4. Follow the instructions how to get your new Artifactory URL from the helm install output
 
@@ -349,7 +348,6 @@ POSTGRES_PASSWORD=$(kubectl get secret artifactory-ha-postgresql -o jsonpath="{.
 helm upgrade --install artifactory-ha  jfrog/artifactory-ha \
     --set artifactory.masterKey=$MASTER_KEY \
     --set artifactory.joinKey=$JOIN_KEY \
-    --set artifactory.metrics.enabled=true --set artifactory.openMetrics.enabled=true \
     --set databaseUpgradeReady=true --set postgresql.postgresqlPassword=$POSTGRES_PASSWORD \
     --set newrelic.license_key=$NEWRELIC_LICENSE_KEY \
     --set jfrog.observability.jpd_url=$JPD_URL \
