@@ -262,7 +262,6 @@ POSTGRES_PASSWORD=$(kubectl get secret artifactory-postgresql -o jsonpath="{.dat
 
 ```bash
 helm upgrade --install artifactory jfrog/artifactory \
-       --set artifactory.masterKey=$MASTER_KEY \
        --set artifactory.joinKey=$JOIN_KEY \
        --set databaseUpgradeReady=true --set postgresql.postgresqlPassword=$POSTGRES_PASSWORD \
        --set newrelic.license_key=$NEWRELIC_LICENSE_KEY \
@@ -346,7 +345,6 @@ POSTGRES_PASSWORD=$(kubectl get secret artifactory-ha-postgresql -o jsonpath="{.
 
 ```bash
 helm upgrade --install artifactory-ha  jfrog/artifactory-ha \
-    --set artifactory.masterKey=$MASTER_KEY \
     --set artifactory.joinKey=$JOIN_KEY \
     --set databaseUpgradeReady=true --set postgresql.postgresqlPassword=$POSTGRES_PASSWORD \
     --set newrelic.license_key=$NEWRELIC_LICENSE_KEY \
