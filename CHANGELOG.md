@@ -2,6 +2,10 @@
 
 All changes to the New Relic log analytics integration will be documented in this file.
 
+## [0.0.9] - September 12, 2024
+
+* FluentD sidecar image version bumped to 4.8, to add verify_ssl flag support for JFrog's FluentD metrics plugins
+
 ## [0.0.8] - August 19, 2024
 
 * FluentD sidecar image version bumped to 4.7, to upgrade base image to bitnami/fluentd 1.17.0
