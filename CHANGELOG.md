@@ -2,6 +2,10 @@
 
 All changes to the New Relic log analytics integration will be documented in this file.
 
+## [0.0.9] - November 7, 2024
+
+* FluentD sidecar image version bumped to 4.13, to reflect changes in `jfrog_siem` and `jfrog_send_metrics` FluentD plugins 
+
 ## [0.0.8] - August 19, 2024
 
 * FluentD sidecar image version bumped to 4.7, to upgrade base image to bitnami/fluentd 1.17.0
