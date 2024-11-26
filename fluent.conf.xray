@@ -10,6 +10,8 @@
   token "#{ENV['JPD_ADMIN_TOKEN']}"
   common_jpd "#{ENV['COMMON_JPD']}"
   target_platform "NEWRELIC"
+  # @log_level debug
+  # verify_ssl "#{ENV['DATADOG_VERIFY_SSL']}"
 </source>
 # NEWRELIC XRAY METRICS OUTPUT
 <match jfrog.metrics.**>
@@ -17,6 +19,8 @@
   target_platform "NEWRELIC"
   apikey "#{ENV['NEWRELIC_LICENSE_KEY']}"
   url "#{ENV['NEWRELIC_METRICS_URI']}"
+  # @log_level debug
+  # verify_ssl "#{ENV['DATADOG_VERIFY_SSL']}"
 </match>
 
 # ALL CALLHOME
