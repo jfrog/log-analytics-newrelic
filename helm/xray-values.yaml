@@ -28,7 +28,7 @@ common:
           name: data-volume
   customSidecarContainers: |
     - name: "xray-platform-fluentd-sidecar"
-      image: "releases-pts-observability-fluentd.jfrog.io/fluentd:4.13"
+      image: "releases-pts-observability-fluentd.jfrog.io/fluentd:4.14"
       imagePullPolicy: "IfNotPresent"
       volumeMounts:
         - mountPath: "{{ .Values.xray.persistence.mountPath }}"
@@ -37,7 +37,7 @@ common:
         - name: JF_PRODUCT_DATA_INTERNAL
           value: {{ .Values.xray.persistence.mountPath }}
         - name: FLUENTD_CONF
-          value: ../../../../{{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluentd.conf
+          value: ../../../..{{ .Values.xray.persistence.mountPath }}/etc/fluentd/fluentd.conf
         - name: JPD_URL
           value: {{ .Values.jfrog.observability.jpd_url }}
         - name: JPD_ADMIN_USERNAME
@@ -57,8 +57,8 @@ common:
           value: {{ .Values.newrelic.metrics_uri }}
 newrelic:
   license_key: NEWRELIC_LICENSE_KEY
-  logs_uri: https://log-api.newrelic.com
-  metrics_uri: https://metrics-api.newrelic.com
+  logs_uri: https://log-api.newrelic.com/log/v1
+  metrics_uri: https://metric-api.newrelic.com/metric/v1
 jfrog:
   observability:
     jpd_url: JPD_URL
