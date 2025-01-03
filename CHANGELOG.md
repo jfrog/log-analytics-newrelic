@@ -2,24 +2,29 @@
 
 All changes to the New Relic log analytics integration will be documented in this file.
 
-## [0.0.10] - November 25, 2024
+
+## [1.0.0] - January 2, 2025
+
+* FluentD sidecar image version bumped to 4.15, to upgrade base image to bitnami/fluentd 1.18.0
+
+## [0.10.0] - November 25, 2024
 
 * FluentD sidecar image version bumped to 4.14, to reflect logging improvements in `jfrog_metrics` and `jfrog_send_metrics` FluentD plugins 
 
-## [0.0.9] - November 7, 2024
+## [0.9.0] - November 7, 2024
 
 * FluentD sidecar image version bumped to 4.13, to reflect changes in `jfrog_siem` and `jfrog_send_metrics` FluentD plugins 
 
-## [0.0.8] - August 19, 2024
+## [0.8.0] - August 19, 2024
 
 * FluentD sidecar image version bumped to 4.7, to upgrade base image to bitnami/fluentd 1.17.0
 * Added http proxy support for JFrog's FluentD metrics plugin - installed as part of the sidecar docker image or directly with the ruby gem
 
-## [0.0.7] - August 8, 2024
+## [0.7.0] - August 8, 2024
 
 * Fix metrics configuration due to deprication of `artifactory.openMetrics` as part of Artifactory 7.87.x charts and renaming it to `artifactory.metrics`
 
-## [0.0.6] - June 6, 2024
+## [0.6.0] - June 6, 2024
 
 * [BREAKING] Adding deprecation notice for partnership-pts-observability.jfrog.io docker registry
 * FluentD sidecar version bumped to 4.3, to upgrade base image to bitnami/fluentd 1.16.5
