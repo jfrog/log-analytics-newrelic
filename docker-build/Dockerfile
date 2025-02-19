@@ -1,10 +1,11 @@
 # Dockerfile for bitnami/fluentd sidecar image with all the necessary plugins for our log analytic providers
-FROM bitnami/fluentd:1.15.2
+FROM bitnami/fluentd:1.18.0
 LABEL maintainer="Partner Engineering <partner_support@jfrog.com>"
 
 ## Build time Arguments, short circuit them to ENV Variables so they are available at run time also
 ARG SOURCE=JFRT
 ARG TARGET=NEWRELIC
+ARG JFROG_HOME=/opt/jfrog
 
 ## Environment Variables set by this docker file, there will be seperate env params set by a env file while running the containers
 ## For better maintainability always depend dockerfile code on the environment variables declared in this file to add more platforms
@@ -21,8 +22,10 @@ RUN fluent-gem install fluent-plugin-jfrog-send-metrics
 
 # Install prerequisites
 RUN apt-get update && apt-get install -y curl
-CMD /bin/bash
+# Set permissions for data folder
+RUN mkdir -p $JFROG_HOME && chown 1001:1001 $JFROG_HOME
 
+CMD /bin/bash
 
 ## Download Config Files
 RUN if [ "$SRC_PLATFORM" = "JFRT" ] ; then echo "Downloading the fluentd config file for $SRC_PLATFORM and $TGT_PLATFORM "; curl https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/master/fluent.conf.rt -o /opt/bitnami/fluentd/conf/fluentd.conf; else echo "Not Downloading"; fi
