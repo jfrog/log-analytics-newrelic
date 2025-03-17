@@ -2,6 +2,10 @@
 
 All changes to the New Relic log analytics integration will be documented in this file.
 
+## [1.0.1] - March 18, 2025
+
+* Update artifactory-ha helm values file
+* Readme minor updates
 
 ## [1.0.0] - January 2, 2025
 
