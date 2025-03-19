@@ -1,6 +1,6 @@
-# NEWRELIC
+# NewRelic
 
-`This integration is last tested with Artifactory 7.71.4 and Xray 3.85.5 versions.`
+`This integration is last tested with Artifactory 7.104.7 and Xray 3.85.5 versions.`
 
 ## Table of Contents
 
@@ -88,7 +88,7 @@ gem install fluent-plugin-jfrog-send-metrics
 
 We rely heavily on environment variables so that the correct log files are streamed to your observability dashboards. Ensure that you fill in the .env file with correct values. Download the jfrog.env file from [here](https://raw.githubusercontent.com/jfrog/log-analytics-newrelic/master/jfrog.env)
 
-* **JF_PRODUCT_DATA_INTERNAL**: The environment variable JF_PRODUCT_DATA_INTERNAL must be defined to the correct location. For each JFrog service you will find its active log files in the `$JFROG_HOME/<product>/var/log` directory
+* **JF_PRODUCT_DATA_INTERNAL**: This environment variable must be set to the folder that contains the `log` folder. For each JFrog service, you can find its active log files in the `$JFROG_HOME/<product>/var/log`. This environment variable should point to the folder that contains the `log` directory. For example, for `artifactory` set this variable to `$JFROG_HOME/artifactory/var`
 * **NEWRELIC_LICENSE_KEY**: License Key from [NewRelic](https://one.newrelic.com/launcher/api-keys-ui.api-keys-launcher)
 * **JPD_URL**: Artifactory JPD URL of the format `http://<ip_address>`
 * **JPD_ADMIN_USERNAME**: Artifactory username for authentication
@@ -132,7 +132,7 @@ For NewRelic as the observability platform, execute these commands to setup the 
 
 2. Fill the necessary information in the docker.env file
 
-    JF_PRODUCT_DATA_INTERNAL: The environment variable JF_PRODUCT_DATA_INTERNAL must be defined to the correct location. It will be the directory where logs are mounted ex: /var/opt/jfrog/artifactory
+    JF_PRODUCT_DATA_INTERNAL: This environment variable must be set to the folder that contains the `log` folder. For each JFrog service, you can find its active log files in the `$JFROG_HOME/<product>/var/log`. This environment variable should point to the folder that contains the `log` directory. For example, for `artifactory` set this variable to `$JFROG_HOME/artifactory/var`
     NEWRELIC_LICENSE_KEY: License Key from [NewRelic](https://one.newrelic.com/launcher/api-keys-ui.api-keys-launcher)
     JPD_URL: Artifactory JPD URL of the format `http://<ip_address>`
     JPD_ADMIN_USERNAME: Artifactory username for authentication
@@ -351,13 +351,15 @@ helm upgrade --install artifactory-ha  jfrog/artifactory-ha \
     --set jfrog.observability.jpd_url=$JPD_URL \
     --set jfrog.observability.username=$JPD_ADMIN_USERNAME \
     --set jfrog.observability.common_jpd=$COMMON_JPD \
-    --set newrelic.logs_uri=$NEWRELIC_LOGS_URI \
-    --set newrelic.metrics_uri=$NEWRELIC_METRICS_URI \
     -f helm/artifactory-ha-values.yaml \
     -n $INST_NAMESPACE
 ```
 
-💡Note: Setting `newrelic.logs_uri` and `newrelic.metrics_uri` values in the above command is **optional** and only required if your New Relic endpoints isn't the default. For example, if working with New Relic EU servers, make sure to set these env variables
+💡Note: It's possible to add `newrelic.logs_uri` and `newrelic.metrics_uri` to the above command. However, this is **optional** and only required if your New Relic endpoints isn't the default. For example, if working with New Relic EU servers, make sure to set these env variables in the above command as following:
+```bash
+    --set newrelic.logs_uri=$NEWRELIC_LOGS_URI \
+    --set newrelic.metrics_uri=$NEWRELIC_METRICS_URI \
+```
 
 #### Xray ⎈:
 
