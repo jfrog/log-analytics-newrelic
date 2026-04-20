@@ -38,7 +38,10 @@ artifactory:
 
 Once this configuration is done and the application is restarted, metrics will be available in Open Metrics Format
 
-Metrics are enabled by default in Xray.
+:bulb: Metrics are enabled by default in Xray.
+
+:bulb: **RTFS Metrics**: If your Artifactory deployment includes RTFS (Real-Time File Store), metrics are automatically collected from the `artifactory/service/rtfs/api/v1/metrics` endpoint. No additional configuration is required -- the fluentd config already includes an RTFS metrics source block that runs alongside the standard Artifactory metrics collection. Requires `fluent-plugin-jfrog-metrics` >= 0.2.16.
+
 For kubernetes based installs, openMetrics are enabled in the helm install commands listed below
 
 ## Fluentd Installation
@@ -425,6 +428,10 @@ JFrog Artifactory Dashboard is divided into three sections Application, Audit, R
 * **Requests** - This section tracks HTTP response codes, top 10 IP addresses for uploads and downloads
 * **Docker** - To monitor Dockerhub pull requests users should have a Dockerhub account either paid or free. Free accounts allow up to 200 pull requests per 6 hour window. Various widgets have been added in the new Docker tab under Artifactory to help monitor your Dockerhub pull requests. An alert is also available to enable if desired that will allow you to send emails or add outbound webhooks through configuration to be notified when you exceed the configurable threshold
 * **Metrics** - To gain insights into the system performance, storage consumption, and connection statistics associated with JFrog Artifactory
+
+#### JFrog RTFS Metrics
+
+When RTFS is deployed as part of Artifactory, RTFS metrics are collected from `artifactory/service/rtfs/api/v1/metrics` and forwarded to New Relic with the `jfrog.rtfs` metric prefix. These metrics are available alongside standard Artifactory metrics in New Relic for monitoring RTFS-specific performance and health.
 
 ### Xray dashboard
 
