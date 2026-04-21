@@ -4,7 +4,7 @@ All changes to the New Relic log analytics integration will be documented in thi
 
 ## [1.0.2] - April 2026
 
-* Added RTFS (Real-Time File Store) metrics collection support in Artifactory fluentd config (JOBS-1897)
+* Added RTFS (JFrog Artifactory Federation Service) metrics collection support in Artifactory fluentd config (JOBS-1897)
 * Requires fluent-plugin-jfrog-metrics >= 0.2.16
 
 ## [1.0.1] - March 18, 2025
