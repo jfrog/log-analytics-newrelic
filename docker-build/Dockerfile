@@ -19,7 +19,8 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 ## Install JFrog Plugins
-RUN fluent-gem install fluent-plugin-newrelic && \
+RUN fluent-gem install fluent-plugin-concat && \
+    fluent-gem install fluent-plugin-newrelic && \
     fluent-gem install fluent-plugin-jfrog-siem && \
     fluent-gem install fluent-plugin-jfrog-metrics -v '~> 0.2.17' && \
     fluent-gem install fluent-plugin-jfrog-send-metrics
