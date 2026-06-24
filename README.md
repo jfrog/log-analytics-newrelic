@@ -144,16 +144,21 @@ For NewRelic as the observability platform, execute these commands to setup the 
     NEWRELIC_LOGS_URI: This New Relic logs endpoint needs to be set if your New Relic instance is in the EU region (or if any other custom configuration is needed). It defaults to https://log-api.newrelic.com/log/v1
     NEWRELIC_METRICS_URI: This New Relic metrics endpoint needs to be set if your New Relic instance is in the EU region (or if any other custom configuration is needed). It defaults to https://metric-api.newrelic.com/metric/v1
 
-3. Execute 'docker run -it --name jfrog-fluentd-newrelic-rt -v <path_to_logs>:/var/opt/jfrog/artifactory --env-file docker.env <image_name>'
+3. Execute 'docker run -it --user root --name jfrog-fluentd-newrelic-rt -v <path_to_logs>:/var/opt/jfrog/artifactory --env-file docker.env <image_name>'
+
+    IMPORTANT (uid 999 log permissions): the container runs as the non-root 'fluent' user (uid 999) and must READ the mounted logs and WRITE .pos files into the mounted log directory. JFrog product logs are typically mode 640 (owned by the product user), which uid 999 cannot access by default, so without a fix the plain command fails immediately with "Errno::EACCES ... .pos" and the worker crash-loops (no logs or metrics are sent). The quickest fix is to add --user root (as shown above); for non-root alternatives see the IMPORTANT note right after this code block.
 
     The <path_to_logs> should be an absolute path where the Jfrog Artifactory Logs folder resides, i.e for an Docker based Artifactory Installation,  ex: /var/opt/jfrog/artifactory/var/logs on the docker host.
 
     Command example
 
-    'docker run -it --name jfrog-fluentd-newrelic-rt -v $JFROG_HOME/artifactory/var/:/var/opt/jfrog/artifactory --env-file docker.env jfrog/fluentd-newrelic-rt'
+    'docker run -it --user root --name jfrog-fluentd-newrelic-rt -v $JFROG_HOME/artifactory/var/:/var/opt/jfrog/artifactory --env-file docker.env jfrog/fluentd-newrelic-rt'
 
 
 ```
+
+> [!IMPORTANT]
+> The fluentd image runs as a non-root user (`fluent`, uid `999`). The container tails the Artifactory log files from the mounted directory and writes `.pos` (position) files next to them, so uid `999` must be able to **read** the mounted log files and **write** into the mounted log directory. JFrog product logs are typically owned by the product user (for example uid `1030`, directory mode `755`, files mode `640`), which uid `999` cannot access by default - fluentd then fails with `Errno::EACCES ... .pos` and the worker restarts in a loop. To avoid this, either run the container as root (`docker run --user root ...`), run it as the uid that owns the Artifactory logs (`--user <artifactory-uid>`), or make the mounted log directory readable and writable by uid `999`.
 
 ### Kubernetes Deployment with Helm
 
